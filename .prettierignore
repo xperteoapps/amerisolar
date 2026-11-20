@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+.next
+.turbo
+node_modules
+supabase/migrations
+assets/source
+supabase/seed.sql

@@ -1,0 +1,72 @@
+// apps/web/app/[site]/layout.tsx
+// Główny layout serwisu krajowego. Segment [site] ustawia proxy.ts na podstawie hosta.
+import type { Metadata, Viewport } from "next";
+import { notFound } from "next/navigation";
+import localFont from "next/font/local";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { JsonLd, organizationLd, websiteLd } from "@/lib/seo/jsonld";
+import { absoluteUrl, isSiteKey, siteKeys, sites } from "@/lib/sites";
+import "../globals.css";
+
+// Inter (OFL) hostowany lokalnie: build nie zależy od Google Fonts, zero żądań do stron trzecich.
+// Dwa zestawy znaków jako osobne rodziny — przeglądarka bierze polskie znaki z latin-ext.
+const interLatin = localFont({
+  src: "../fonts/inter-latin-wght-normal.woff2",
+  weight: "100 900",
+  variable: "--font-inter",
+  display: "swap",
+});
+const interLatinExt = localFont({
+  src: "../fonts/inter-latin-ext-wght-normal.woff2",
+  weight: "100 900",
+  variable: "--font-inter-ext",
+  display: "swap",
+});
+
+export function generateStaticParams() {
+  return siteKeys.map((site) => ({ site }));
+}
+
+export async function generateMetadata({ params }: LayoutProps<"/[site]">): Promise<Metadata> {
+  const { site: key } = await params;
+  if (!isSiteKey(key)) return {};
+  const site = sites[key];
+  return {
+    metadataBase: new URL(absoluteUrl(site, "/")),
+    applicationName: "Amerisolar",
+    formatDetection: { telephone: false },
+    robots: site.isLive ? undefined : { index: false, follow: false },
+  };
+}
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+};
+
+export default async function SiteLayout({ children, params }: LayoutProps<"/[site]">) {
+  const { site: key } = await params;
+  if (!isSiteKey(key)) notFound();
+  const site = sites[key];
+
+  return (
+    <html
+      lang={site.htmlLang}
+      className={`${interLatin.variable} ${interLatinExt.variable} h-full antialiased`}
+    >
+      <body className="flex min-h-full flex-col">
+        <JsonLd data={[organizationLd(site), websiteLd(site)]} />
+        <SiteHeader site={site} />
+        <main id="tresc" className="flex-1">
+          {children}
+        </main>
+        <SiteFooter site={site} />
+        {/* Vercel Analytics działa bez cookies — dozwolone przed zgodą (CLAUDE.md §9). */}
+        <Analytics />
+        <SpeedInsights />
+      </body>
+    </html>
+  );
+}

@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@import "@amerisolar/ui/tokens.css";
+
+/* Klasy Tailwind używane w pakiecie UI */
+@source "../../../packages/ui/src";
+
+html {
+  color: var(--color-ink);
+  background: white;
+  font-family: var(--font-sans);
+  -webkit-text-size-adjust: 100%;
+}

@@ -1,0 +1,448 @@
+{
+  "_meta": {
+    "source": "Karty katalogowe Amerisolar (EN-V1.0-2024/2025), katalog 'Amerisolar USA 2026' (styczeń 2026), certyfikat TÜV SÜD Z2 093522 0030 Rev. 00, cennik agenta (ważny do 30.10.2026 — WYGASŁ)",
+    "manufacturer": "Worldwide Energy and Manufacturing USA Co., Ltd.",
+    "brand": "Amerisolar",
+    "manufacturer_contact": "sales@amerisolar-usa.com",
+    "stc": "1000 W/m2, 25°C, AM1.5; tolerancja Pmax ±3%",
+    "noct_conditions": "800 W/m2, otoczenie 20°C, wiatr 1 m/s",
+    "rule": "Jedyne źródło prawdy dla parametrów. Nie zmieniaj wartości bez nowej karty katalogowej. Pola 'to_verify' wymagają potwierdzenia u producenta przed publikacją."
+  },
+  "products": [
+    {
+      "model": "AS-7M108N-BHC",
+      "slug": "as-7m108n-bhc",
+      "family": "TOPCon N-type",
+      "segment_pl": ["dachy domów", "małe firmy", "instalatorzy"],
+      "bifacial": true,
+      "frame_color": "black",
+      "cell": "Monocrystalline N-type TOPCon 182x91 mm, half-cell",
+      "cells": 108,
+      "power_bins_w": [430, 435, 440, 445, 450],
+      "efficiency_pct": [22.02, 22.28, 22.53, 22.79, 23.04],
+      "stc": {
+        "voc_v": [38.4, 38.6, 38.8, 39.0, 39.2],
+        "isc_a": [14.06, 14.12, 14.18, 14.24, 14.3],
+        "vmp_v": [32.2, 32.4, 32.6, 32.8, 33.0],
+        "imp_a": [13.36, 13.43, 13.5, 13.57, 13.64]
+      },
+      "noct_pmax_w": [324, 328, 332, 336, 340],
+      "bifacial_gain_example": {
+        "base_w": 440,
+        "gain_pct_to_pmax_w": { "10": 484, "15": 506, "20": 528, "25": 550, "30": 572 }
+      },
+      "temp_coeff": {
+        "pmax_pct_per_c": -0.3,
+        "voc_pct_per_c": -0.25,
+        "isc_pct_per_c": 0.045,
+        "noct_c": "43±2"
+      },
+      "dimensions_mm": [1722, 1134, 30],
+      "weight_kg": 24,
+      "glass": "3.2 mm hartowane z powłoką AR (wg karty: 'Front/Back Glass')",
+      "junction_box": "IP68, 3 diody",
+      "connector": "MC4 lub kompatybilne",
+      "max_system_voltage_v": "1000/1500 DC",
+      "max_series_fuse_a": 30,
+      "fire_rating": "Class C",
+      "mechanical_load_pa": { "wind": 2400, "snow": 5400 },
+      "operating_temp_c": "-40 do +85",
+      "warranty_years": { "product": 20, "linear_power": 30 },
+      "certifications_on_datasheet": [
+        "IEC 61215",
+        "IEC 61730",
+        "CE",
+        "ISO 9001:2015",
+        "ISO 14001:2015",
+        "ISO 45001:2018"
+      ],
+      "packaging": { "pcs_per_pallet": 36, "pcs_per_20ft": 216, "pcs_per_40ft_hq": 936 },
+      "to_verify": [
+        "brak w przesłanym certyfikacie TÜV — poprosić o certyfikat IEC dla tego modelu",
+        "konstrukcja tyłu (szkło vs folia transparentna)"
+      ],
+      "area_m2": 1.953,
+      "areal_mass_kg_m2": 12.29,
+      "max_power_density_w_m2": 230,
+      "areal_mass_note": "masa samego modułu — bez konstrukcji wsporczej/balastu"
+    },
+    {
+      "model": "AS-7M120N-HC",
+      "slug": "as-7m120n-hc",
+      "family": "TOPCon N-type",
+      "segment_pl": ["dachy domów", "dachy firm", "instalatorzy"],
+      "bifacial": false,
+      "cell": "Monocrystalline N-type 182x91 mm, half-cell",
+      "cells": 120,
+      "power_bins_w": [465, 470, 475, 480, 485, 490, 495, 500],
+      "efficiency_pct": [21.49, 21.72, 21.95, 22.18, 22.41, 22.65, 22.88, 23.11],
+      "stc": {
+        "voc_v": [42.0, 42.2, 42.4, 42.6, 42.8, 43.0, 43.2, 43.4],
+        "isc_a": [13.96, 14.02, 14.08, 14.14, 14.2, 14.26, 14.32, 14.38],
+        "vmp_v": [35.2, 35.4, 35.6, 35.8, 36.0, 36.2, 36.4, 36.6],
+        "imp_a": [13.22, 13.28, 13.35, 13.41, 13.48, 13.54, 13.6, 13.67]
+      },
+      "noct_pmax_w": [348, 352, 356, 360, 364, 368, 372, 376],
+      "temp_coeff": {
+        "pmax_pct_per_c": -0.3,
+        "voc_pct_per_c": -0.25,
+        "isc_pct_per_c": 0.045,
+        "noct_c": "43±2"
+      },
+      "dimensions_mm": [1908, 1134, 30],
+      "weight_kg": 23,
+      "glass": "3.2 mm hartowane z powłoką AR",
+      "junction_box": "IP68, 3 diody",
+      "connector": "MC4 lub kompatybilne",
+      "max_system_voltage_v": "1000/1500 DC",
+      "max_series_fuse_a": 25,
+      "fire_rating": "Class C",
+      "mechanical_load_pa": { "wind": 2400, "snow": 5400 },
+      "operating_temp_c": "-40 do +85",
+      "warranty_years": { "product": 20, "linear_power": 30 },
+      "certifications_on_datasheet": [
+        "IEC 61215",
+        "IEC 61730",
+        "CE",
+        "ISO 9001:2015",
+        "ISO 14001:2015",
+        "ISO 45001:2018"
+      ],
+      "packaging": { "pcs_per_pallet": 36, "pcs_per_20ft": 216, "pcs_per_40ft_hq": 864 },
+      "to_verify": ["brak w przesłanym certyfikacie TÜV — poprosić o certyfikat IEC"],
+      "area_m2": 2.164,
+      "areal_mass_kg_m2": 10.63,
+      "max_power_density_w_m2": 231,
+      "areal_mass_note": "masa samego modułu — bez konstrukcji wsporczej/balastu"
+    },
+    {
+      "model": "AS-7M120N-BHC",
+      "slug": "as-7m120n-bhc",
+      "family": "TOPCon N-type",
+      "segment_pl": ["carporty", "dachy płaskie", "małe farmy", "instalatorzy"],
+      "bifacial": true,
+      "cell": "Monocrystalline bifacial N-type, half-cell",
+      "cells": 120,
+      "power_bins_w": [465, 470, 475, 480, 485, 490, 495, 500],
+      "efficiency_pct": [21.49, 21.72, 21.95, 22.18, 22.41, 22.65, 22.88, 23.11],
+      "stc": {
+        "voc_v": [42.0, 42.2, 42.4, 42.6, 42.8, 43.0, 43.2, 43.4],
+        "isc_a": [13.96, 14.02, 14.08, 14.14, 14.2, 14.26, 14.32, 14.38],
+        "vmp_v": [35.2, 35.4, 35.6, 35.8, 36.0, 36.2, 36.4, 36.6],
+        "imp_a": [13.22, 13.28, 13.35, 13.41, 13.48, 13.54, 13.6, 13.67]
+      },
+      "noct_note": "Tabela NOCT w karcie ma tylko 5 kolumn dla 8 klas mocy — nie publikować NOCT do czasu wyjaśnienia",
+      "bifacial_gain_example": {
+        "base_w": 470,
+        "gain_pct_to_pmax_w": { "10": 517, "15": 541, "20": 564, "25": 588, "30": 611 }
+      },
+      "temp_coeff": {
+        "pmax_pct_per_c": -0.3,
+        "voc_pct_per_c": -0.25,
+        "isc_pct_per_c": 0.045,
+        "noct_c": "43±2"
+      },
+      "dimensions_mm": [1908, 1134, 30],
+      "weight_kg": 23,
+      "glass": "3.2 mm hartowane z powłoką AR; tył: transparentny backsheet",
+      "junction_box": "IP68, 3 diody",
+      "connector": "MC4 kompatybilne",
+      "max_system_voltage_v": "1500 DC",
+      "max_series_fuse_a": 30,
+      "fire_rating": "Class C",
+      "mechanical_load_pa": { "wind": 2400, "snow": 5400 },
+      "operating_temp_c": "-40 do +85",
+      "warranty_years": { "product": 20, "linear_power": 30 },
+      "certifications_on_datasheet": [
+        "IEC 61215",
+        "IEC 61730",
+        "CE",
+        "ISO 9001:2015",
+        "ISO 14001:2015",
+        "ISO 45001:2018"
+      ],
+      "packaging": { "pcs_per_pallet": 36, "pcs_per_20ft": 216, "pcs_per_40ft_hq": 864 },
+      "to_verify": ["brak w przesłanym certyfikacie TÜV", "NOCT dla wszystkich klas mocy"],
+      "area_m2": 2.164,
+      "areal_mass_kg_m2": 10.63,
+      "max_power_density_w_m2": 231,
+      "areal_mass_note": "masa samego modułu — bez konstrukcji wsporczej/balastu"
+    },
+    {
+      "model": "AS-7M144N-HC",
+      "slug": "as-7m144n-hc",
+      "family": "TOPCon N-type",
+      "segment_pl": ["dachy przemysłowe", "farmy PV", "EPC"],
+      "bifacial": false,
+      "cell": "Monocrystalline N-type 182x91 mm, half-cell",
+      "cells": 144,
+      "power_bins_w": [560, 565, 570, 575, 580, 585, 590, 595, 600],
+      "efficiency_pct": [21.67, 21.86, 22.06, 22.25, 22.44, 22.64, 22.83, 23.02, 23.22],
+      "stc": {
+        "voc_v": [50.4, 50.6, 50.8, 51.0, 51.2, 51.4, 51.6, 51.8, 52.0],
+        "isc_a": [14.04, 14.09, 14.14, 14.19, 14.24, 14.29, 14.34, 14.39, 14.44],
+        "vmp_v": [42.2, 42.4, 42.6, 42.8, 43.0, 43.2, 43.4, 43.6, 43.8],
+        "imp_a": [13.28, 13.33, 13.39, 13.44, 13.49, 13.54, 13.59, 13.65, 13.7]
+      },
+      "noct_pmax_w": [421, 425, 429, 433, 437, 441, 445, 449, 454],
+      "temp_coeff": {
+        "pmax_pct_per_c": -0.3,
+        "voc_pct_per_c": -0.25,
+        "isc_pct_per_c": 0.045,
+        "noct_c": "43±2"
+      },
+      "dimensions_mm": [2279, 1134, 30],
+      "weight_kg": 27.5,
+      "glass": "3.2 mm hartowane z powłoką AR",
+      "junction_box": "IP68, 3 diody",
+      "connector": "MC4 lub kompatybilne",
+      "max_system_voltage_v": "1000/1500 DC",
+      "max_series_fuse_a": 25,
+      "fire_rating": "Class C",
+      "mechanical_load_pa": { "wind": 2400, "snow": 5400 },
+      "operating_temp_c": "-40 do +85",
+      "warranty_years": { "product": 20, "linear_power": 30 },
+      "certifications_on_datasheet": [
+        "IEC 61215",
+        "IEC 61730",
+        "CE",
+        "ISO 9001:2015",
+        "ISO 14001:2015",
+        "ISO 45001:2018"
+      ],
+      "packaging": { "pcs_per_pallet": 36, "pcs_per_20ft": 180, "pcs_per_40ft_hq": "720/740" },
+      "to_verify": ["brak w przesłanym certyfikacie TÜV"],
+      "area_m2": 2.584,
+      "areal_mass_kg_m2": 10.64,
+      "max_power_density_w_m2": 232,
+      "areal_mass_note": "masa samego modułu — bez konstrukcji wsporczej/balastu"
+    },
+    {
+      "model": "AS-8M132N-BHC",
+      "slug": "as-8m132n-bhc",
+      "family": "TOPCon N-type, double glass",
+      "segment_pl": ["farmy fotowoltaiczne", "EPC", "deweloperzy OZE", "agro-PV"],
+      "bifacial": true,
+      "cell": "Monocrystalline N-type (format 210), half-cell",
+      "cells": 132,
+      "power_bins_w": [690, 695, 700, 705, 710, 715, 720],
+      "efficiency_pct": [22.21, 22.37, 22.53, 22.7, 22.86, 23.02, 23.18],
+      "stc": {
+        "voc_v": [49.8, 50.0, 50.2, 50.4, 50.6, 50.8, 51.0],
+        "isc_a": [17.35, 17.39, 17.43, 17.47, 17.51, 17.55, 17.59],
+        "vmp_v": [41.8, 42.0, 42.2, 42.4, 42.6, 42.8, 43.0],
+        "imp_a": [16.51, 16.55, 16.59, 16.63, 16.67, 16.71, 16.75]
+      },
+      "noct_pmax_w": [518, 522, 526, 530, 534, 538, 542],
+      "bifacial_gain_example": {
+        "base_w": 695,
+        "gain_pct_to_pmax_w": { "10": 765, "15": 799, "20": 834, "25": 869, "30": 904 }
+      },
+      "temp_coeff": {
+        "pmax_pct_per_c": -0.3,
+        "voc_pct_per_c": -0.25,
+        "isc_pct_per_c": 0.045,
+        "noct_c": "43±2"
+      },
+      "dimensions_mm": [2384, 1303, 35],
+      "weight_kg": 38.5,
+      "glass": "2 mm + 2 mm hartowane (przód z AR)",
+      "junction_box": "IP68, 3 diody",
+      "connector": "MC4 kompatybilne",
+      "max_system_voltage_v": "1500 DC",
+      "max_series_fuse_a": 35,
+      "fire_rating": "Class C",
+      "mechanical_load_pa": { "wind": 2400, "snow": 5400 },
+      "operating_temp_c": "-40 do +85",
+      "warranty_years": { "product": 20, "linear_power": 30 },
+      "certifications_on_datasheet": [
+        "IEC 61215",
+        "IEC 61730",
+        "CE",
+        "ISO 9001:2015",
+        "ISO 14001:2015",
+        "ISO 45001:2018"
+      ],
+      "packaging": { "pcs_per_pallet": 31, "pcs_per_20ft": 124, "pcs_per_40ft_hq": 558 },
+      "to_verify": [
+        "cennik podaje 730 W, karta kończy się na 720 W — potrzebna aktualna karta",
+        "brak w przesłanym certyfikacie TÜV"
+      ],
+      "area_m2": 3.106,
+      "areal_mass_kg_m2": 12.39,
+      "max_power_density_w_m2": 232,
+      "areal_mass_note": "masa samego modułu — bez konstrukcji wsporczej/balastu"
+    },
+    {
+      "model": "AS-7M144NFL-HC Black",
+      "slug": "as-7m144nfl-hc-black",
+      "family": "Elastyczny (flexible) TOPCon",
+      "segment_pl": [
+        "dachy o niskiej nośności (hale, magazyny, obiekty rolnicze)",
+        "obiekty z drganiami i obciążeniem dynamicznym (stadiony, hale sportowe, areny, przemysł) — po ocenie konstruktora",
+        "dachy łukowe i zakrzywione",
+        "dachy membranowe — po potwierdzeniu kompatybilności kleju"
+      ],
+      "bifacial": false,
+      "cell": "Monocrystalline TOPCon 182x91 mm",
+      "cells": 144,
+      "power_bins_w": [550, 555, 560, 565, 570, 575],
+      "efficiency_pct": [20.66, 20.85, 21.04, 21.23, 21.42, 21.6],
+      "stc": {
+        "voc_v": [53.79, 53.99, 54.19, 54.39, 54.59, 54.79],
+        "isc_a": [12.89, 12.92, 12.96, 13.0, 13.04, 13.09],
+        "vmp_v": [45.19, 45.25, 45.29, 45.34, 45.39, 45.44],
+        "imp_a": [12.18, 12.27, 12.37, 12.47, 12.56, 12.66]
+      },
+      "noct_pmax_w": [414, 418, 422, 426, 430, 434],
+      "temp_coeff": {
+        "pmax_pct_per_c": -0.29,
+        "voc_pct_per_c": -0.26,
+        "isc_pct_per_c": 0.045,
+        "noct_c": "45±2"
+      },
+      "dimensions_mm": [2246, 1185, 2],
+      "weight_kg": 8.0,
+      "front_cover": "lekki, wysokoprzezroczysty polimer",
+      "bending_radius_m": 0.3,
+      "mounting": "klejenie, bez przewiertów i bez konstrukcji",
+      "claim_weight": "o 70% lżejszy przy tej samej mocy (deklaracja producenta)",
+      "junction_box": "IP68, 3 diody",
+      "connector": "MC4 kompatybilne",
+      "max_system_voltage_v": "1500 DC",
+      "safety_class": "Class II",
+      "max_series_fuse_a": 25,
+      "operating_temp_c": "-40 do +85",
+      "warranty_years": { "product": 12, "linear_power": 25 },
+      "certifications_on_datasheet": [
+        "IEC 61215",
+        "IEC 61730",
+        "ISO 9001:2015",
+        "ISO 14001:2015",
+        "ISO 45001:2018"
+      ],
+      "tuv_certificate": {
+        "number": "Z2 093522 0030 Rev. 00",
+        "body": "TÜV SÜD Product Service GmbH",
+        "standards": [
+          "IEC 61215-1:2021",
+          "IEC 61215-1-1:2021",
+          "IEC 61215-2:2021",
+          "IEC 61730-1:2023",
+          "IEC 61730-2:2023"
+        ],
+        "issued": "2026-03-19",
+        "valid_until": "2031-01-15",
+        "covered_range": "AS-7M144NFL-HC-550..575"
+      },
+      "packaging": { "pcs_per_pallet": 70, "pcs_per_20ft": 280, "pcs_per_40ft_hq": 1260 },
+      "to_verify": [
+        "dopuszczalne podłoża i klej, wymagania ppoż. dla dachów hal w PL",
+        "brak zakresu obciążeń mechanicznych w karcie",
+        "wyniki testów obciążeń dynamicznych/cyklicznych (np. IEC 62782 DML) i EL po cyklach gięcia",
+        "specyfikacja kleju: podłoża, siła odrywania, starzenie UV, zakres temperatur",
+        "klasyfikacja ogniowa w układzie z pokryciem dachowym (obiekty użyteczności publicznej)"
+      ],
+      "area_m2": 2.662,
+      "areal_mass_kg_m2": 3.01,
+      "max_power_density_w_m2": 216
+    },
+    {
+      "model": "AS-7M132FL-HC",
+      "slug": "as-7m132fl-hc",
+      "family": "Elastyczny (flexible) PERC",
+      "segment_pl": [
+        "dachy o niskiej nośności (hale, magazyny, obiekty rolnicze)",
+        "obiekty z drganiami i obciążeniem dynamicznym (stadiony, hale sportowe, areny, przemysł) — po ocenie konstruktora",
+        "dachy łukowe i zakrzywione",
+        "dachy membranowe — po potwierdzeniu kompatybilności kleju"
+      ],
+      "bifacial": false,
+      "cell": "Monocrystalline PERC 182x91 mm",
+      "cells": 132,
+      "power_bins_w": [460, 465, 470, 475, 480],
+      "efficiency_pct": [18.09, 18.29, 18.49, 18.68, 18.88],
+      "stc": {
+        "voc_v": [45.4, 45.53, 45.66, 45.79, 45.92],
+        "isc_a": [12.54, 12.62, 12.7, 12.78, 12.86],
+        "vmp_v": [38.27, 38.4, 38.53, 38.65, 38.78],
+        "imp_a": [12.02, 12.11, 12.2, 12.29, 12.38]
+      },
+      "noct_pmax_w": [355, 359, 363, 367, 371],
+      "temp_coeff": {
+        "pmax_pct_per_c": -0.39,
+        "voc_pct_per_c": -0.3,
+        "isc_pct_per_c": 0.06,
+        "noct_c": "42±2"
+      },
+      "dimensions_mm": [2250, 1130, 2],
+      "weight_kg": 7.2,
+      "bending_radius_m": 0.3,
+      "junction_box": "IP68, 3 diody",
+      "connector": "MC4 kompatybilne",
+      "max_system_voltage_v": "1000/1500 DC",
+      "max_series_fuse_a": 20,
+      "fire_rating": "Type 1 (UL1703) / Class C (IEC 61730)",
+      "operating_temp_c": "-40 do +85",
+      "warranty_years": { "product": 12, "linear_power": 25 },
+      "certifications_on_datasheet": [
+        "IEC 61215",
+        "IEC 61730",
+        "ISO 9001:2015",
+        "ISO 14001:2015",
+        "ISO 45001:2018"
+      ],
+      "packaging": { "pcs_per_pallet": 66, "pcs_per_20ft": 264, "pcs_per_40ft_hq": 1122 },
+      "to_verify": [
+        "w cenniku występuje jako 'AS-FL7M132-HC' — ujednolicić nazwę",
+        "brak w przesłanym certyfikacie TÜV",
+        "wyniki testów obciążeń dynamicznych/cyklicznych (np. IEC 62782 DML) i EL po cyklach gięcia",
+        "specyfikacja kleju: podłoża, siła odrywania, starzenie UV, zakres temperatur",
+        "klasyfikacja ogniowa w układzie z pokryciem dachowym (obiekty użyteczności publicznej)"
+      ],
+      "area_m2": 2.542,
+      "areal_mass_kg_m2": 2.83,
+      "max_power_density_w_m2": 189
+    }
+  ],
+  "price_list_models_without_datasheet": [
+    "AS-7M108N-HC 450 W",
+    "AS-7M132N-HC 525 W",
+    "AS-7M144N-BHC 600 W bifacial",
+    "AS-8M132N-BHC 730 W bifacial",
+    "AS-7M132N-BHCR G12R 650 W bifacial (moduł prostokątny)",
+    "AS-FL7M144-HC 520 W (elastyczny)",
+    "AS-FL7M144-HC 575 W Full Black (elastyczny)"
+  ],
+  "company_facts": {
+    "founded": "1993, Kalifornia (wg katalogu 2026); marka Amerisolar od 2007",
+    "capacity": "ok. 11 GW mocy produkcyjnej na świecie (2025, wg katalogu)",
+    "factories": "Chiny, Wietnam, Korea Płd., USA, ZEA (moce poszczególnych zakładów — do potwierdzenia)",
+    "shipments_2025": "ok. 11 GW do ponad 130 krajów (deklaracja w katalogu)",
+    "poland_2025_references_mw": 58,
+    "europe_2025_references_mw": {
+      "Dania": 75,
+      "Węgry": 75,
+      "Niemcy": 42,
+      "Hiszpania": 30,
+      "Włochy": 24,
+      "Francja": 22,
+      "Holandia": 11,
+      "Belgia": 9,
+      "Norwegia": 6
+    },
+    "patents": "ponad 150",
+    "warranty_catalog": "do 30 lat; 91,2% mocy po 12 latach, 80,6% po 30 latach; tolerancja mocy 0..+3%",
+    "insurance": "ubezpieczenie produktowe CHUBB (polisa nr 93519144c2 — sprawdzić ważność)",
+    "bankability": "ocena PROTOS; banki wymienione w katalogu — wymagają potwierdzenia przed publikacją",
+    "awards": "EUPD Research Top PV Brand — Hiszpania i Brazylia, 2021",
+    "other_lines": [
+      "magazyny energii ESS 3,6/5/10 kW (LiFePO4)",
+      "panele cienkowarstwowe",
+      "anti-dust / anti-glare / BC",
+      "panele przenośne",
+      "roboty AI",
+      "elektrolizery wodoru"
+    ]
+  }
+}
