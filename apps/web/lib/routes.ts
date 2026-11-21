@@ -32,7 +32,7 @@ export const plRoutes: RouteEntry[] = [
   { path: "/narzedzia/", label: "Narzędzia", nav: "main", ready: false, sitemap: "tools" },
   {
     path: "/certyfikaty-i-dokumenty/",
-    label: "Karty katalogowe",
+    label: "Karty katalogowe i certyfikaty",
     nav: "main",
     ready: true,
     sitemap: "pages",

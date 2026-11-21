@@ -16,6 +16,7 @@ import {
   range,
 } from "@amerisolar/content";
 import { BarList } from "@/components/bars";
+import { CertBadges } from "@/components/cert-badges";
 import { CtaBand, InlineCta, rfqHref } from "@/components/cta-band";
 import { MediaFigure } from "@/components/media-figure";
 import { ModuleLineup, SegmentLegend } from "@/components/module-drawing";
@@ -227,6 +228,9 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
           <Fact value={percent(effMax)} label="maksymalna sprawność modułu w ofercie" />
         </Container>
       </section>
+
+      {/* 2b. CERTYFIKATY */}
+      <CertBadges />
 
       {/* 3. OFERTA W JEDNEJ SKALI */}
       <section className="bg-forest-950 text-white">
