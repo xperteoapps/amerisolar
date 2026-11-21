@@ -7,7 +7,11 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   transpilePackages: ["@amerisolar/ui", "@amerisolar/content"],
   poweredByHeader: false,
-  images: { formats: ["image/avif", "image/webp"] },
+  images: {
+    formats: ["image/avif", "image/webp"],
+    // Tymczasowo: grafiki Higgsfield z CDN (docelowo Supabase Storage — lib/media.ts).
+    remotePatterns: [{ protocol: "https", hostname: "d8j0ntlcm91z4.cloudfront.net" }],
+  },
   turbopack: {
     rules: {
       "*.css": {

@@ -1,26 +1,35 @@
 /* packages/ui/src/tokens.css
- * Tokeny design systemu Amerisolar (Tailwind v4 @theme).
- * TODO(klient): kolory marki z oficjalnego logo Amerisolar (SVG/brandbook).
- * Do tego czasu paleta neutralna: granat „inżynierski” + akcent słoneczny.
- * Kontrasty par tekst/tło sprawdzone pod WCAG 2.1 AA.
+ * Design system Amerisolar. Kolory marki z logo producenta:
+ *   zieleń #529e4a (znak, słońce) i pomarańcz #d07c35 (łuk pod znakiem).
+ * Pomarańcz = główne CTA (tekst na nim: ink, kontrast AA). Zieleń w tekście tylko
+ * w ciemniejszym odcieniu forest-700 (AA na bieli). Granat „cell” wyłącznie na
+ * rysunkach modułów (kolor ogniw), nie w interfejsie.
  */
 @theme {
-  --color-brand-50: oklch(0.97 0.01 250);
-  --color-brand-100: oklch(0.93 0.03 250);
-  --color-brand-600: oklch(0.45 0.12 255);
-  --color-brand-700: oklch(0.38 0.11 255);
-  --color-brand-900: oklch(0.24 0.06 255);
+  --color-leaf: #529e4a; /* zieleń marki: znak, akcenty graficzne, duże elementy */
+  --color-forest-950: #0d2114; /* tło sekcji ciemnych */
+  --color-forest-900: #15301d;
+  --color-forest-800: #1e4428;
+  --color-forest-700: #2f6e2a; /* zieleń dla tekstu i linków na jasnym tle */
+  --color-forest-300: #a9d3a3; /* tekst pomocniczy na ciemnym tle */
+  --color-forest-100: #e3f1e0;
 
-  --color-accent-400: oklch(0.82 0.16 80);
-  --color-accent-500: oklch(0.76 0.17 70);
+  --color-sun: #d07c35; /* pomarańcz marki: główne CTA */
+  --color-sun-deep: #b8682a;
 
-  --color-ink: oklch(0.21 0.02 255);
-  --color-muted: oklch(0.45 0.02 255);
-  --color-line: oklch(0.9 0.01 255);
-  --color-surface: oklch(0.985 0.003 255);
+  --color-paper: #f5f7f4;
+  --color-ink: #13201a;
+  --color-muted: #4d5b53;
+  --color-frame: #a9b4ae;
+  --color-line: #dde3de;
 
-  --font-sans: var(--font-inter), var(--font-inter-ext), ui-sans-serif, system-ui, sans-serif;
+  --color-cell: #1c2b45; /* ogniwa na rysunkach modułów */
+  --color-cell-line: #8fa1bd;
+  --color-flex: #7fb3d5; /* linia elastyczna na rysunkach (tylko grafika) */
 
-  --radius-card: 0.75rem;
-  --container-site: 76rem;
+  --font-sans: var(--font-archivo), var(--font-archivo-ext), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --container-site: 78rem;
 }

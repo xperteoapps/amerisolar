@@ -11,18 +11,18 @@ import { JsonLd, organizationLd, websiteLd } from "@/lib/seo/jsonld";
 import { absoluteUrl, isSiteKey, siteKeys, sites } from "@/lib/sites";
 import "../globals.css";
 
-// Inter (OFL) hostowany lokalnie: build nie zależy od Google Fonts, zero żądań do stron trzecich.
-// Dwa zestawy znaków jako osobne rodziny — przeglądarka bierze polskie znaki z latin-ext.
-const interLatin = localFont({
-  src: "../fonts/inter-latin-wght-normal.woff2",
+// Archivo (OFL) hostowany lokalnie, osie wght + wdth (szeroka odmiana w nagłówkach).
+// Dwa zestawy znaków jako osobne rodziny — polskie znaki z latin-ext.
+const archivo = localFont({
+  src: "../fonts/archivo-latin-standard-normal.woff2",
   weight: "100 900",
-  variable: "--font-inter",
+  variable: "--font-archivo",
   display: "swap",
 });
-const interLatinExt = localFont({
-  src: "../fonts/inter-latin-ext-wght-normal.woff2",
+const archivoExt = localFont({
+  src: "../fonts/archivo-latin-ext-standard-normal.woff2",
   weight: "100 900",
-  variable: "--font-inter-ext",
+  variable: "--font-archivo-ext",
   display: "swap",
 });
 
@@ -52,10 +52,7 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[si
   const site = sites[key];
 
   return (
-    <html
-      lang={site.htmlLang}
-      className={`${interLatin.variable} ${interLatinExt.variable} h-full antialiased`}
-    >
+    <html lang={site.htmlLang} className={`${archivo.variable} ${archivoExt.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <JsonLd data={[organizationLd(site), websiteLd(site)]} />
         <SiteHeader site={site} />
