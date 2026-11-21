@@ -2,6 +2,66 @@
   "_meta": {
     "rule": "Rejestr plików do pobrania. Pliki leżą w apps/web/public/dokumenty/. Wpis dodajemy dopiero, gdy plik jest w repo — strona pokazuje link tylko dla istniejących wpisów."
   },
-  "datasheets": {},
-  "certificates": []
+  "datasheets": {
+    "as-7m108n-bhc": {
+      "file": "/dokumenty/amerisolar-as-7m108n-bhc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M108N-BHC",
+      "version": "EN-V1.0-2024",
+      "lang": "EN",
+      "sizeKb": 865
+    },
+    "as-7m120n-hc": {
+      "file": "/dokumenty/amerisolar-as-7m120n-hc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M120N-HC",
+      "version": "EN-V1.0-2024",
+      "lang": "EN",
+      "sizeKb": 975
+    },
+    "as-7m120n-bhc": {
+      "file": "/dokumenty/amerisolar-as-7m120n-bhc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M120N-BHC",
+      "version": "EN-V1.0-2024",
+      "lang": "EN",
+      "sizeKb": 1010
+    },
+    "as-7m144n-hc": {
+      "file": "/dokumenty/amerisolar-as-7m144n-hc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M144N-HC",
+      "version": "EN-V1.0-2024",
+      "lang": "EN",
+      "sizeKb": 986
+    },
+    "as-8m132n-bhc": {
+      "file": "/dokumenty/amerisolar-as-8m132n-bhc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-8M132N-BHC",
+      "version": "EN-V1.0-2024",
+      "lang": "EN",
+      "sizeKb": 1065
+    },
+    "as-7m144nfl-hc-black": {
+      "file": "/dokumenty/amerisolar-as-7m144nfl-hc-black-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M144NFL-HC Black",
+      "version": "EN-V1.0-2025",
+      "lang": "EN",
+      "sizeKb": 774
+    },
+    "as-7m132fl-hc": {
+      "file": "/dokumenty/amerisolar-as-7m132fl-hc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M132FL-HC",
+      "version": "EN-V1.0-2025",
+      "lang": "EN",
+      "sizeKb": 1274
+    }
+  },
+  "certificates": [
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-z2-093522-0030.pdf",
+      "title": "Certyfikat TÜV SÜD Z2 093522 0030",
+      "number": "Z2 093522 0030 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "models": ["AS-7M144NFL-HC"],
+      "lang": "EN",
+      "sizeKb": 370
+    }
+  ]
 }
