@@ -18,6 +18,7 @@ import {
   productPath,
   type ProductGroup,
 } from "@/lib/catalog";
+import { datasheetFor } from "@/lib/documents";
 import { breadcrumbLd, JsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { isSiteKey, sites } from "@/lib/sites";
@@ -52,7 +53,7 @@ export default async function CatalogPage({ params }: PageProps<"/[site]/panele-
       <JsonLd
         data={breadcrumbLd(site, [
           { name: "Strona główna", path: "/" },
-          { name: "Panele fotowoltaiczne", path: CATALOG_PATH },
+          { name: "Moduły w ofercie", path: CATALOG_PATH },
         ])}
       />
       <section className="border-b border-line bg-paper">
@@ -60,19 +61,19 @@ export default async function CatalogPage({ params }: PageProps<"/[site]/panele-
           <Breadcrumbs
             items={[
               { name: "Strona główna", href: "/" },
-              { name: "Panele fotowoltaiczne", href: CATALOG_PATH },
+              { name: "Moduły w ofercie", href: CATALOG_PATH },
             ]}
             className="text-muted"
           />
           <h1 className="font-wide mt-8 max-w-3xl text-4xl font-bold sm:text-5xl">
-            Panele fotowoltaiczne Amerisolar
+            Moduły w naszej ofercie — panele fotowoltaiczne Amerisolar
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">
             {catalog.length} modeli od {Math.min(...catalog.map((p) => powerRange(p).min))} do{" "}
-            {Math.max(...catalog.map((p) => powerRange(p).max))} W. Każda karta zawiera pełne tabele STC i
-            NOCT, wymiary, pakowanie z liczbą kWp na paletę i kontener, gwarancje oraz certyfikaty.
+            {Math.max(...catalog.map((p) => powerRange(p).max))} W. Przy każdym module pobierzesz kartę
+            katalogową PDF — od razu, bez rejestracji i bez pisania maila.
           </p>
-          <ModuleLineup items={catalog} tone="light" className="mt-12 h-auto w-full max-w-5xl" />
+          <ModuleLineup items={catalog} tone="light" className="mt-12 h-auto w-full" />
         </Container>
       </section>
 
@@ -89,28 +90,38 @@ export default async function CatalogPage({ params }: PageProps<"/[site]/panele-
                 {items.map((p) => {
                   const pr = powerRange(p);
                   return (
-                    <li key={p.slug} className="border-b border-line">
-                      <Link
-                        href={productPath(p)}
-                        className="group grid gap-4 py-7 md:grid-cols-[1.3fr_repeat(4,minmax(0,1fr))] md:items-baseline"
-                      >
-                        <span>
-                          <span className="font-wide block text-xl font-semibold text-forest-700 group-hover:underline">
-                            {p.model}
-                          </span>
-                          <span className="mt-1 block text-sm text-muted">{kindLabel(p)}</span>
+                    <li
+                      key={p.slug}
+                      className="grid gap-4 border-b border-line py-7 md:grid-cols-[1.3fr_repeat(4,minmax(0,1fr))_auto] md:items-center"
+                    >
+                      <Link href={productPath(p)} className="group block">
+                        <span className="font-wide block text-xl font-semibold text-forest-700 group-hover:underline">
+                          {p.model}
                         </span>
-                        <Stat label="moc" value={range(pr.min, pr.max, "W")} />
-                        <Stat label="sprawność maks." value={percent(maxEfficiency(p))} />
-                        <Stat
-                          label="wymiary"
-                          value={`${p.dimensions_mm.map((d) => formatNumber(d, "pl-PL", 0)).join(" × ")} mm`}
-                        />
-                        <Stat
-                          label="40'HQ"
-                          value={`${pieces(p, "40ft_hq")} szt., ${kwpLabel(p, "40ft_hq")} kWp`}
-                        />
+                        <span className="mt-1 block text-sm text-muted">{kindLabel(p)}</span>
                       </Link>
+                      <Stat label="moc" value={range(pr.min, pr.max, "W")} />
+                      <Stat label="sprawność maks." value={percent(maxEfficiency(p))} />
+                      <Stat
+                        label="wymiary"
+                        value={`${p.dimensions_mm.map((d) => formatNumber(d, "pl-PL", 0)).join(" × ")} mm`}
+                      />
+                      <Stat
+                        label="40'HQ"
+                        value={`${pieces(p, "40ft_hq")} szt., ${kwpLabel(p, "40ft_hq")} kWp`}
+                      />
+                      {datasheetFor(p.slug) ? (
+                        <a
+                          href={datasheetFor(p.slug)!.file}
+                          download
+                          className="inline-flex items-center gap-2 justify-self-start rounded-(--radius-sm) border border-ink/20 bg-white px-3.5 py-2 text-sm font-semibold hover:border-forest-700"
+                        >
+                          <svg aria-hidden="true" viewBox="0 0 20 20" className="size-4 fill-forest-700">
+                            <path d="M10 13.5 5.5 9l1.4-1.4L9 9.7V3h2v6.7l2.1-2.1L14.5 9 10 13.5ZM4 15h12v2H4z" />
+                          </svg>
+                          Karta PDF<span className="sr-only"> {p.model}</span>
+                        </a>
+                      ) : null}
                     </li>
                   );
                 })}

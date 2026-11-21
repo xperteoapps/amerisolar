@@ -33,6 +33,7 @@ import {
   vocAt,
 } from "@/lib/catalog";
 import { media } from "@/lib/media";
+import { datasheetFor } from "@/lib/documents";
 import { RFQ_PATH } from "@/lib/routes";
 import { faqLd, JsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -362,7 +363,7 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
                     Gwarancja
                   </th>
                   <th scope="col" className="py-3 pl-4 text-right font-medium">
-                    <span className="sr-only">Zapytanie</span>
+                    <span className="sr-only">Karta katalogowa i zapytanie</span>
                   </th>
                 </tr>
               </thead>
@@ -394,12 +395,23 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
                       {p.warranty_years.product}/{p.warranty_years.linear_power} lat
                     </td>
                     <td className="py-4 pl-4 text-right">
-                      <Link
-                        href={rfqHref(p.model)}
-                        className="text-sm font-semibold text-sun-deep hover:underline"
-                      >
-                        Zapytaj o cenę
-                      </Link>
+                      <span className="flex justify-end gap-5 whitespace-nowrap">
+                        {datasheetFor(p.slug) ? (
+                          <a
+                            href={datasheetFor(p.slug)!.file}
+                            download
+                            className="text-sm font-semibold text-forest-700 hover:underline"
+                          >
+                            Karta PDF<span className="sr-only"> {p.model}</span>
+                          </a>
+                        ) : null}
+                        <Link
+                          href={rfqHref(p.model)}
+                          className="text-sm font-semibold text-sun-deep hover:underline"
+                        >
+                          Zapytaj o cenę
+                        </Link>
+                      </span>
                     </td>
                   </tr>
                 ))}

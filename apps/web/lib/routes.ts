@@ -14,7 +14,7 @@ export const plRoutes: RouteEntry[] = [
   { path: "/", label: "Strona główna", ready: true, sitemap: "pages" },
   {
     path: "/panele-fotowoltaiczne/",
-    label: "Panele fotowoltaiczne",
+    label: "Moduły w naszej ofercie",
     nav: "main",
     ready: true,
     sitemap: "categories",
@@ -32,8 +32,8 @@ export const plRoutes: RouteEntry[] = [
   { path: "/narzedzia/", label: "Narzędzia", nav: "main", ready: false, sitemap: "tools" },
   {
     path: "/certyfikaty-i-dokumenty/",
-    label: "Certyfikaty i dokumenty",
-    nav: "footer",
+    label: "Karty katalogowe",
+    nav: "main",
     ready: true,
     sitemap: "pages",
   },

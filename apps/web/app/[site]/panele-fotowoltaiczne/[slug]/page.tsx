@@ -172,7 +172,7 @@ export default async function ProductPage({ params }: Props) {
   const faqs = faq(p);
   const crumbs = [
     { name: "Strona główna", href: "/" },
-    { name: "Panele fotowoltaiczne", href: CATALOG_PATH },
+    { name: "Moduły w ofercie", href: CATALOG_PATH },
     { name: p.model, href: path },
   ];
   const flex = isFlexible(p);
@@ -215,9 +215,19 @@ export default async function ProductPage({ params }: Props) {
               <Link href={rfqHref(p.model)} className={buttonClass("primary", "px-6 py-3.5 text-base")}>
                 Zapytaj o cenę kontenerową
               </Link>
-              <a href="#parametry" className={buttonClass("ghost", "px-6 py-3.5 text-base")}>
-                Parametry techniczne
-              </a>
+              {datasheetFor(p.slug) ? (
+                <a
+                  href={datasheetFor(p.slug)!.file}
+                  download
+                  className={buttonClass("ghost", "px-6 py-3.5 text-base")}
+                >
+                  Pobierz kartę katalogową PDF
+                </a>
+              ) : (
+                <a href="#parametry" className={buttonClass("ghost", "px-6 py-3.5 text-base")}>
+                  Parametry techniczne
+                </a>
+              )}
             </div>
             <p className="mt-4 text-sm text-muted">
               Dostawy w ilościach kontenerowych bezpośrednio od producenta: {pieces(p, "40ft_hq")} szt. w
