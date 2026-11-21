@@ -79,60 +79,111 @@ export function ModuleLineup({
   tone?: "dark" | "light";
   className?: string;
 }) {
-  const gap = 150;
-  const labelSpace = 470;
+  const gap = 170;
+  const labelSpace = 640;
   const maxL = Math.max(...items.map((p) => p.dimensions_mm[0]));
   const totalW = items.reduce((s, p) => s + p.dimensions_mm[1], 0) + gap * (items.length - 1);
-  const top = 120;
+  const flexIdx = items.map((p, i) => (isFlexible(p) ? i : -1)).filter((i) => i >= 0);
+  const bracketSpace = flexIdx.length > 0 ? 330 : 0; // miejsce na opis linii elastycznej nad modułami
+  const top = 260 + bracketSpace;
   const H = maxL + top + labelSpace;
   const text = tone === "dark" ? "#ffffff" : "var(--color-ink)";
-  const sub = tone === "dark" ? "var(--color-forest-300)" : "var(--color-muted)";
+  const sub = tone === "dark" ? "var(--color-forest-100)" : "var(--color-muted)";
   const floor = tone === "dark" ? "rgba(255,255,255,0.25)" : "var(--color-line)";
   const xs = items.map((_, i) => items.slice(0, i).reduce((s, q) => s + q.dimensions_mm[1] + gap, 0));
+  const flexColor = segmentColor.flex;
+
+  // Klamra nad modułami elastycznymi (zakładamy, że są obok siebie — tak sortuje katalog).
+  const fx0 = flexIdx.length ? xs[flexIdx[0]!]! : 0;
+  const fLast = flexIdx.length ? items[flexIdx[flexIdx.length - 1]!]! : undefined;
+  const fx1 = fLast ? xs[flexIdx[flexIdx.length - 1]!]! + fLast.dimensions_mm[1] : 0;
+  const flexTop = flexIdx.length
+    ? top + maxL - Math.max(...flexIdx.map((i) => items[i]!.dimensions_mm[0])) - 230
+    : 0;
 
   return (
-    <svg
-      viewBox={`0 0 ${totalW} ${H}`}
-      className={className}
-      role="img"
-      aria-labelledby="lineup-title lineup-desc"
-    >
-      <title id="lineup-title">Moduły Amerisolar w jednej skali</title>
-      <desc id="lineup-desc">
-        {items
-          .map(
-            (p) =>
-              `${shortModel(p)}: ${p.dimensions_mm[0]} × ${p.dimensions_mm[1]} × ${p.dimensions_mm[2]} mm, ${powerRange(p).min}–${powerRange(p).max} W`,
-          )
-          .join("; ")}
-      </desc>
-      <line x1={0} x2={totalW} y1={top + maxL + 20} y2={top + maxL + 20} stroke={floor} strokeWidth={6} />
-      {items.map((p, i) => {
-        const [L, W] = p.dimensions_mm;
-        const x = xs[i]!;
-        const y = top + maxL - L;
-        return (
-          <g key={p.slug} className="lineup-item" style={{ animationDelay: `${120 + i * 70}ms` }}>
-            <ModuleFace p={p} x={x} y={y} />
-            <text x={x + W / 2} y={y - 40} textAnchor="middle" fill={sub} fontSize={74}>
-              {formatNumber(L, "pl-PL", 0)} mm
-            </text>
-            <rect x={x} y={top + maxL + 60} width={W} height={18} rx={9} fill={segmentColor[segmentOf(p)]} />
-            <text x={x} y={top + maxL + 190} fill={text} fontSize={96} fontWeight={600}>
-              {powerRange(p).max} W
-            </text>
-            <text x={x} y={top + maxL + 290} fill={sub} fontSize={64}>
-              {shortModel(p)}
-            </text>
-            <text x={x} y={top + maxL + 380} fill={sub} fontSize={56} opacity={0.9}>
-              {isFlexible(p)
-                ? `${p.dimensions_mm[2]} mm, ${formatNumber(p.weight_kg)} kg`
-                : `${formatNumber(p.weight_kg)} kg`}
+    <div className="overflow-x-auto">
+      <svg
+        viewBox={`0 0 ${totalW} ${H}`}
+        className={`min-w-[56rem] ${className ?? ""}`}
+        role="img"
+        aria-labelledby="lineup-title lineup-desc"
+      >
+        <title id="lineup-title">Moduły Amerisolar w jednej skali</title>
+        <desc id="lineup-desc">
+          {items
+            .map(
+              (p) =>
+                `${shortModel(p)}${isFlexible(p) ? " (moduł elastyczny)" : ""}: ${p.dimensions_mm[0]} × ${p.dimensions_mm[1]} × ${p.dimensions_mm[2]} mm, ${powerRange(p).min}–${powerRange(p).max} W, ${p.weight_kg} kg`,
+            )
+            .join("; ")}
+        </desc>
+        <line x1={0} x2={totalW} y1={top + maxL + 24} y2={top + maxL + 24} stroke={floor} strokeWidth={6} />
+
+        {flexIdx.length ? (
+          <g>
+            <path
+              d={`M${fx0} ${flexTop + 70} V${flexTop} H${fx1} V${flexTop + 70}`}
+              fill="none"
+              stroke={flexColor}
+              strokeWidth={14}
+            />
+            <text
+              x={(fx0 + fx1) / 2}
+              y={flexTop - 50}
+              textAnchor="middle"
+              fill={flexColor}
+              fontSize={118}
+              fontWeight={700}
+            >
+              Moduły elastyczne
             </text>
           </g>
-        );
-      })}
-    </svg>
+        ) : null}
+
+        {items.map((p, i) => {
+          const [L, W, T] = p.dimensions_mm;
+          const x = xs[i]!;
+          const y = top + maxL - L;
+          const flex = isFlexible(p);
+          return (
+            <g key={p.slug} className="lineup-item" style={{ animationDelay: `${120 + i * 70}ms` }}>
+              <ModuleFace p={p} x={x} y={y} />
+              {/* wymiary: długość × szerokość */}
+              <text x={x + W / 2} y={y - 50} textAnchor="middle" fill={sub} fontSize={94} fontWeight={500}>
+                {formatNumber(L, "pl-PL", 0)} × {formatNumber(W, "pl-PL", 0)} mm
+              </text>
+              <rect
+                x={x}
+                y={top + maxL + 70}
+                width={W}
+                height={22}
+                rx={11}
+                fill={segmentColor[segmentOf(p)]}
+              />
+              <text x={x} y={top + maxL + 235} fill={text} fontSize={138} fontWeight={700}>
+                {powerRange(p).max} W
+              </text>
+              <text x={x} y={top + maxL + 365} fill={text} fontSize={104} fontWeight={600}>
+                {shortModel(p)}
+              </text>
+              <text
+                x={x}
+                y={top + maxL + 490}
+                fill={flex ? flexColor : sub}
+                fontSize={96}
+                fontWeight={flex ? 700 : 500}
+              >
+                grubość {T} mm
+              </text>
+              <text x={x} y={top + maxL + 600} fill={sub} fontSize={96}>
+                {formatNumber(p.weight_kg)} kg
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
 }
 
