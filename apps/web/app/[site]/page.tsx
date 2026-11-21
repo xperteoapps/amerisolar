@@ -22,7 +22,6 @@ import { ModuleLineup, SegmentLegend } from "@/components/module-drawing";
 import {
   catalog,
   CATALOG_PATH,
-  formatDate,
   kwpLabel,
   maxEfficiency,
   pieces,
@@ -76,7 +75,6 @@ const roofMin = Math.min(...roofModels.map((p) => powerRange(p).min));
 const roofMax = Math.max(...roofModels.map((p) => powerRange(p).max));
 const flexHeadline = by("as-7m144nfl-hc-black");
 const perc = by("as-7m132fl-hc");
-const tuv = flexHeadline.tuv_certificate!;
 
 const facts = productsFile.company_facts as {
   poland_2025_references_mw: number;
@@ -135,7 +133,7 @@ const homeFaq = [
   },
   {
     question: "Jakie certyfikaty mają moduły?",
-    answer: `Karty katalogowe modułów szklanych wymieniają IEC 61215, IEC 61730 i CE. Moduł ${flexHeadline.model} ma certyfikat ${tuv.body} nr ${tuv.number}, ważny do ${formatDate(tuv.valid_until)}. Dokumenty przekazujemy z ofertą.`,
+    answer: `Moduły w ofercie mają certyfikaty TÜV SÜD lub TÜV Rheinland według IEC 61215 i IEC 61730 oraz atesty CE — każdy z określonym zakresem mocy, który podajemy na stronie z kartami katalogowymi. Fabryka ma certyfikaty ISO 9001, ISO 14001 i ISO 45001. Wszystkie dokumenty pobierzesz bez rejestracji.`,
   },
   {
     question: "Co zrobić, gdy dach nie uniesie klasycznych paneli?",
@@ -754,8 +752,9 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
             <div className="border-t border-ink/80 pt-6">
               <h3 className="font-semibold">Normy i certyfikaty</h3>
               <p className="mt-3 leading-relaxed text-muted">
-                Karty katalogowe modułów szklanych: IEC 61215, IEC 61730, CE. Moduł {flexHeadline.model}:
-                certyfikat {tuv.body} nr {tuv.number}, ważny do {formatDate(tuv.valid_until)}.
+                Certyfikaty TÜV SÜD i TÜV Rheinland (IEC 61215, IEC 61730), atesty CE, testy odporności na
+                PID, mgłę solną i amoniak oraz ISO 9001, 14001 i 45001 fabryki. Przy każdym certyfikacie
+                podajemy dokładny zakres mocy, który obejmuje.
               </p>
             </div>
             <div className="border-t border-ink/80 pt-6">

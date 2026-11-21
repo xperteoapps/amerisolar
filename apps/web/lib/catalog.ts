@@ -2,9 +2,9 @@
 // Widok katalogu dla stron: grupowanie, nazwy, fakty dopuszczone do publikacji.
 // Wszystkie liczby pochodzą z data/products.json (przez @amerisolar/content).
 // Wartości wyliczone (kWp/kontener, Voc w mrozie) są oznaczane na stronach jako wyliczenia.
+import { certificatesForProduct, coverageLabel } from "./documents";
 import {
   formatNumber,
-  hasTuvCertificate,
   isFlexible,
   kwpPer,
   piecesPer,
@@ -55,18 +55,19 @@ const withheld: Record<string, { glass?: true }> = {
 };
 export const showGlass = (p: Product) => Boolean(p.glass) && !withheld[p.slug]?.glass;
 
-/** Certyfikaty do publikacji zgodnie z CLAUDE.md §6. */
+/**
+ * Certyfikaty do publikacji zgodnie z CLAUDE.md §6: z rejestru data/documents.json
+ * (tylko w zakresie mocy z certyfikatu) + normy wymienione na karcie katalogowej.
+ */
 export function certificatesFor(p: Product): { label: string; detail?: string }[] {
-  const fromDatasheet = p.certifications_on_datasheet.map((c) => ({ label: c }));
-  if (!hasTuvCertificate(p) || !p.tuv_certificate) return fromDatasheet;
-  const t = p.tuv_certificate;
-  return [
-    {
-      label: `${t.body}, certyfikat nr ${t.number}`,
-      detail: `${t.standards.join(", ")}; zakres: ${t.covered_range}; ważny do ${formatDate(t.valid_until)}`,
-    },
-    ...fromDatasheet,
-  ];
+  const fromRegistry = certificatesForProduct(p)
+    .filter(({ cert }) => cert.category === "product" || cert.category === "ce" || cert.category === "tests")
+    .map(({ cert, coverage }) => ({
+      label: `${cert.body}, nr ${cert.number}`,
+      detail: `${cert.standards.join(", ")}; ${coverageLabel(coverage)}${cert.validUntil ? `; ważny do ${formatDate(cert.validUntil)}` : ""}`,
+    }));
+  const fromDatasheet = p.certifications_on_datasheet.map((c) => ({ label: `${c} (wg karty katalogowej)` }));
+  return [...fromRegistry, ...fromDatasheet];
 }
 
 export function formatDate(iso: string): string {

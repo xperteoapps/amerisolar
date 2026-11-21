@@ -17,7 +17,7 @@ import {
 import { CtaBand, InlineCta, rfqHref } from "@/components/cta-band";
 import { DimensionDrawing } from "@/components/module-drawing";
 import { DocLink } from "@/components/doc-link";
-import { certificatesForModel, datasheetFor } from "@/lib/documents";
+import { certificatesForProduct, coverageLabel, datasheetFor } from "@/lib/documents";
 import {
   CATALOG_PATH,
   certificatesFor,
@@ -385,8 +385,11 @@ export default async function ProductPage({ params }: Props) {
               </ul>
               <div className="mt-6 flex flex-col items-start gap-3">
                 {datasheetFor(p.slug) ? <DocLink doc={datasheetFor(p.slug)!} /> : null}
-                {certificatesForModel(p.model).map((c) => (
-                  <DocLink key={c.file} doc={c} />
+                {certificatesForProduct(p).map(({ cert, coverage }) => (
+                  <span key={cert.file} className="flex flex-col gap-1">
+                    <DocLink doc={cert} />
+                    <span className="text-xs text-muted">{coverageLabel(coverage)}</span>
+                  </span>
                 ))}
                 <Link
                   href="/certyfikaty-i-dokumenty/"

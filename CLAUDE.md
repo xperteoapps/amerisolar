@@ -268,7 +268,15 @@ Pełna mapa trafia do tabeli `keywords` oraz do `docs/keyword-map-pl.md`. Jedna 
 
 - **Jedyne źródło prawdy:** `data/products.json` (wyciąg z kart katalogowych EN-V1.0-2024/2025, katalogu 2026 i certyfikatu TÜV). Nie zaokrąglamy, nie „poprawiamy” i nie wymyślamy parametrów. Plik jest walidowany schematem zod w `packages/content` (błędny plik zatrzymuje build).
 - Pola `to_verify` blokują publikację danego faktu do czasu potwierdzenia przez producenta.
-- **Certyfikaty:** przesłany certyfikat TÜV SÜD nr **Z2 093522 0030** (ważny do 15.01.2031, IEC 61215:2021 / IEC 61730:2023) obejmuje moduły elastyczne **AS-7M144NFL-HC** (550–575 W) i serie **AS-7M…N-HCR**. **Nie obejmuje** modeli AS-7M108N-BHC, AS-7M120N-HC/BHC, AS-7M144N-HC, AS-8M132N-BHC ani AS-7M132FL-HC. Dla nich piszemy tylko to, co jest na karcie („IEC 61215, IEC 61730, CE”), dopóki nie dostaniemy ich certyfikatów.
+- **Certyfikaty (stan 21.11.2026, zweryfikowane z PDF z dysku klienta):** rejestr w `data/documents.json` (pole `coverage`: model + zakres mocy dokładnie wg certyfikatu). Strona pokazuje certyfikat przy modelu **tylko dla klas mocy, które obejmuje** (`lib/documents.ts`). Stan na dziś:
+  - TÜV SÜD Z2 093522 0021 (do 17.04.2029): AS-7M108N-BHC 415–465 W, AS-7M120N-BHC 460–520 W, AS-8M132N-BHC 675–700 W
+  - TÜV SÜD Z2 093522 0023 (do 17.04.2029): AS-7M120N-HC 500–520 W, AS-7M144N-HC 600–620 W — **z oferty tylko 500 W i 600 W**
+  - TÜV Rheinland PV 50674535 0001 (do 17.08.2027): AS-8M132N-BHC 695–725 W
+  - TÜV SÜD Z2 093522 0025 (do 31.03.2029): AS-7M132FL-HC 460–475 W — **480 W nieobjęte**
+  - TÜV SÜD Z2 093522 0030 (do 15.01.2031): AS-7M144NFL-HC 550–575 W
+  - atesty CE TÜV SÜD N8A 0022 / 0024 / 0027 / 0031 (te same zakresy co odpowiednie certyfikaty), testy PID / mgła solna / amoniak Z2 0018–0020 (AS-7M108N-BHC 390–435 W, AS-7M120N-BHC 430–480 W), ISO 9001/14001/45001 fabryki w Nantong (do 08.06.2029), PV CYCLE WEEE Włochy i Niemcy (do 31.12.2026)
+  - pominięte: certyfikaty modeli spoza oferty (P-type, poly, BHCR, BC), krajowe dla rynków pozaeuropejskich (SEC, RETIE, FIDE), MCS (UK), włoskie klasy ogniowe (dotyczą AS-7M132-HC i AS-6M144FL-HC, nie naszych modeli), Top PV Brand 2021 (Brazylia)
+  - do uzyskania: certyfikaty obejmujące AS-7M120N-HC 465–495 W, AS-7M144N-HC 560–595 W, AS-7M132FL-HC 480 W
 - **Ceny:** otrzymany cennik jest FOB, w USD/EUR za Wp, na minimum 1 kontener 40', i był **ważny do 30.10.2026 (wygasł)**. Nie publikujemy cen FOB. Domyślnie stosujemy „Cena na zapytanie”. Ceny publiczne (np. „od X zł/Wp netto, DDP Polska”) wolno pokazać tylko po pisemnej decyzji klienta.
 - **Niespójności do wyjaśnienia** (nie publikować, dopóki nie są rozstrzygnięte): 730 W w cenniku vs 720 W w karcie AS-8M132N-BHC; nazwy „AS-FL7M…” w cenniku vs „AS-7M…FL” w kartach; NOCT w karcie AS-7M120N-BHC (5 kolumn dla 8 klas mocy); modele z cennika bez kart (AS-7M132N-HC 525 W, AS-7M144N-BHC, AS-7M132N-BHCR 650 W).
 - **Domeny producenta:** karty i katalog podają `amerisolar-usa.com` / `sales@amerisolar-usa.com`; strona partnera to `weamerisolar.com`. Linkujemy do tej, którą wskaże klient.

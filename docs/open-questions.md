@@ -23,7 +23,8 @@
 
 ## Produkty (blokują publikację faktów)
 
-- [ ] Certyfikaty IEC/TÜV dla modeli spoza Z2 093522 0030.
+- [ ] Certyfikaty IEC/TÜV obejmujące pełny zakres mocy: AS-7M120N-HC 465–495 W, AS-7M144N-HC 560–595 W, AS-7M132FL-HC 480 W (obecne certyfikaty: tylko 500 W / 600 W / do 475 W).
+- [ ] Klasyfikacja ogniowa dla AS-7M144NFL-HC i AS-7M132FL-HC (na dysku są tylko dla innych modeli).
 - [ ] AS-8M132N-BHC: 730 W w cenniku vs 720 W w karcie.
 - [ ] AS-7M120N-BHC: tabela NOCT (5 kolumn dla 8 klas mocy).
 - [ ] Nazewnictwo „AS-FL7M…” (cennik) vs „AS-7M…FL” (karty).
