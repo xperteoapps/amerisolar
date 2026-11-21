@@ -38,7 +38,7 @@ export const plRoutes: RouteEntry[] = [
     sitemap: "pages",
   },
   { path: "/o-amerisolar/", label: "O Amerisolar", nav: "footer", ready: false, sitemap: "pages" },
-  { path: "/zapytanie-ofertowe/", label: "Zapytanie ofertowe", ready: false, sitemap: "pages" },
+  { path: "/zapytanie-ofertowe/", label: "Zapytanie ofertowe", ready: true, sitemap: "pages" },
   { path: "/kontakt/", label: "Kontakt", nav: "footer", ready: false, sitemap: "pages" },
   {
     path: "/polityka-prywatnosci/",

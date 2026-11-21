@@ -1,15 +1,75 @@
 // apps/web/components/module-drawing.tsx
-// Schematy wymiarowe modułów rysowane z wymiarów z kart katalogowych.
-// To rysunki techniczne (obrys + wymiary), nie wizerunek produktu: bez układu ogniw,
-// koloru ramy ani innych szczegółów, których nie ma w danych (CLAUDE.md §8).
+// Schematy modułów rysowane z danych z kart katalogowych: wymiary (mm), liczba ogniw
+// (układ 6 kolumn ogniw połówkowych), kolor ramy (frame_color), brak ramy w linii elastycznej.
+// To schematy, nie wizerunek produktu (CLAUDE.md §8) — podpisujemy je jako schematy.
 import { formatNumber, isFlexible, powerRange, type Product } from "@amerisolar/content";
+import { segmentColor, segmentLabel, segmentOf, type Segment } from "@/lib/catalog";
 
 const shortModel = (p: Product) => p.model.replace(/ Black$/, "");
 
-/**
- * Wszystkie moduły w jednej skali, stojące obok siebie (wysokość = długość modułu).
- * Używane w hero strony głównej i w katalogu.
- */
+/** Lico modułu: rama + siatka ogniw (6 kolumn, ogniwa połówkowe z przerwą w połowie). */
+function ModuleFace({ p, x, y }: { p: Product; x: number; y: number }) {
+  const [L, W] = p.dimensions_mm;
+  const flex = isFlexible(p);
+  const frame = flex ? 0 : 35;
+  const edge = flex ? 30 : 20;
+  const cols = 6;
+  const rows = Math.round(p.cells / cols);
+  const midGap = 30;
+  const gap = 6;
+  const innerX = x + frame + edge;
+  const innerY = y + frame + edge;
+  const innerW = W - 2 * (frame + edge);
+  const innerH = L - 2 * (frame + edge) - midGap;
+  const cw = (innerW - gap * (cols - 1)) / cols;
+  const ch = (innerH - gap * (rows - 2)) / rows;
+  const black = p.frame_color === "black" || p.model.endsWith("Black");
+  const frameFill = black ? "#1a1d22" : "#c9d0d8";
+  const cellFill = black ? "#161b26" : "#1f3157";
+  const backFill = black ? "#0e1117" : "#dfe6ee";
+
+  const cells = [];
+  for (let r = 0; r < rows; r++) {
+    const cy = innerY + r * (ch + gap) + (r >= rows / 2 ? midGap - gap : 0);
+    for (let c = 0; c < cols; c++) {
+      cells.push(
+        <rect key={`${r}-${c}`} x={innerX + c * (cw + gap)} y={cy} width={cw} height={ch} fill={cellFill} />,
+      );
+    }
+  }
+
+  return (
+    <g>
+      {flex ? (
+        <rect
+          x={x}
+          y={y}
+          width={W}
+          height={L}
+          rx={30}
+          fill={backFill}
+          stroke={segmentColor.flex}
+          strokeWidth={14}
+        />
+      ) : (
+        <>
+          <rect x={x} y={y} width={W} height={L} rx={8} fill={frameFill} />
+          <rect x={x + frame} y={y + frame} width={W - 2 * frame} height={L - 2 * frame} fill={backFill} />
+        </>
+      )}
+      {cells}
+      {!flex ? (
+        <path
+          d={`M${x + frame} ${y + frame} L${x + W * 0.55} ${y + frame} L${x + frame} ${y + L * 0.38} Z`}
+          fill="#ffffff"
+          opacity={0.07}
+        />
+      ) : null}
+    </g>
+  );
+}
+
+/** Wszystkie moduły w jednej skali (wysokość = długość modułu), z kolorem grupy zastosowań. */
 export function ModuleLineup({
   items,
   tone = "dark",
@@ -19,20 +79,17 @@ export function ModuleLineup({
   tone?: "dark" | "light";
   className?: string;
 }) {
-  const gap = 150; // mm między modułami na rysunku
-  const labelSpace = 420; // mm pod modułami na podpisy
+  const gap = 150;
+  const labelSpace = 470;
   const maxL = Math.max(...items.map((p) => p.dimensions_mm[0]));
   const totalW = items.reduce((s, p) => s + p.dimensions_mm[1], 0) + gap * (items.length - 1);
   const top = 120;
   const H = maxL + top + labelSpace;
-
-  const stroke = tone === "dark" ? "var(--color-cell-line)" : "var(--color-frame)";
-  const glassFill = tone === "dark" ? "var(--color-cell)" : "var(--color-cell)";
   const text = tone === "dark" ? "#ffffff" : "var(--color-ink)";
   const sub = tone === "dark" ? "var(--color-forest-300)" : "var(--color-muted)";
-
-  // Pozycje X liczone z góry (bez mutacji w renderze).
+  const floor = tone === "dark" ? "rgba(255,255,255,0.25)" : "var(--color-line)";
   const xs = items.map((_, i) => items.slice(0, i).reduce((s, q) => s + q.dimensions_mm[1] + gap, 0));
+
   return (
     <svg
       viewBox={`0 0 ${totalW} ${H}`}
@@ -49,61 +106,31 @@ export function ModuleLineup({
           )
           .join("; ")}
       </desc>
-      {/* linia „podłogi” */}
-      <line
-        x1={0}
-        x2={totalW}
-        y1={top + maxL}
-        y2={top + maxL}
-        stroke={stroke}
-        strokeWidth={6}
-        opacity={0.5}
-      />
+      <line x1={0} x2={totalW} y1={top + maxL + 20} y2={top + maxL + 20} stroke={floor} strokeWidth={6} />
       {items.map((p, i) => {
         const [L, W] = p.dimensions_mm;
         const x = xs[i]!;
-        const flex = isFlexible(p);
         const y = top + maxL - L;
-        const g = (
+        return (
           <g key={p.slug} className="lineup-item" style={{ animationDelay: `${120 + i * 70}ms` }}>
-            <rect
-              x={x}
-              y={y}
-              width={W}
-              height={L}
-              fill={flex ? "none" : glassFill}
-              stroke={flex ? "var(--color-flex)" : stroke}
-              strokeWidth={flex ? 14 : 22}
-              rx={flex ? 40 : 6}
-            />
-            {flex ? (
-              <rect
-                x={x + 60}
-                y={y + 60}
-                width={W - 120}
-                height={L - 120}
-                fill="var(--color-flex)"
-                opacity={0.16}
-                rx={24}
-              />
-            ) : null}
-            <text x={x + W / 2} y={y - 40} textAnchor="middle" fill={sub} fontSize={78} className="nums">
+            <ModuleFace p={p} x={x} y={y} />
+            <text x={x + W / 2} y={y - 40} textAnchor="middle" fill={sub} fontSize={74}>
               {formatNumber(L, "pl-PL", 0)} mm
             </text>
-            <text x={x} y={top + maxL + 130} fill={text} fontSize={92} fontWeight={600}>
+            <rect x={x} y={top + maxL + 60} width={W} height={18} rx={9} fill={segmentColor[segmentOf(p)]} />
+            <text x={x} y={top + maxL + 190} fill={text} fontSize={96} fontWeight={600}>
               {powerRange(p).max} W
             </text>
-            <text x={x} y={top + maxL + 240} fill={sub} fontSize={66}>
+            <text x={x} y={top + maxL + 290} fill={sub} fontSize={64}>
               {shortModel(p)}
             </text>
-            <text x={x} y={top + maxL + 330} fill={sub} fontSize={58} opacity={0.85}>
-              {flex
+            <text x={x} y={top + maxL + 380} fill={sub} fontSize={56} opacity={0.9}>
+              {isFlexible(p)
                 ? `${p.dimensions_mm[2]} mm, ${formatNumber(p.weight_kg)} kg`
                 : `${formatNumber(p.weight_kg)} kg`}
             </text>
           </g>
         );
-        return g;
       })}
     </svg>
   );
@@ -115,7 +142,6 @@ export function DimensionDrawing({ product, className }: { product: Product; cla
   const flex = isFlexible(product);
   const pad = 260;
   const sideGap = 420;
-  // Profil: grubość pogrubiona do czytelności, z adnotacją.
   const sideW = Math.max(T * 4, 60);
   const width = pad + W + sideGap + sideW + pad;
   const height = pad + L + pad;
@@ -144,19 +170,7 @@ export function DimensionDrawing({ product, className }: { product: Product; cla
           <path d="M0,0 L10,5 L0,10 z" fill={dim} />
         </marker>
       </defs>
-      {/* rzut z przodu */}
-      <rect
-        x={pad}
-        y={pad}
-        width={W}
-        height={L}
-        fill={flex ? "var(--color-flex)" : "var(--color-cell)"}
-        fillOpacity={flex ? 0.18 : 1}
-        stroke={flex ? "var(--color-flex)" : "var(--color-frame)"}
-        strokeWidth={flex ? 10 : 18}
-        rx={flex ? 30 : 4}
-      />
-      {/* wymiar szerokości */}
+      <ModuleFace p={product} x={pad} y={pad} />
       <line
         x1={pad}
         x2={pad + W}
@@ -167,17 +181,9 @@ export function DimensionDrawing({ product, className }: { product: Product; cla
         markerStart="url(#arr)"
         markerEnd="url(#arr)"
       />
-      <text
-        x={pad + W / 2}
-        y={pad - 160}
-        textAnchor="middle"
-        fontSize={80}
-        fill="var(--color-ink)"
-        className="nums"
-      >
+      <text x={pad + W / 2} y={pad - 160} textAnchor="middle" fontSize={80} fill="var(--color-ink)">
         {formatNumber(W, "pl-PL", 0)} mm
       </text>
-      {/* wymiar długości */}
       <line
         x1={pad - 120}
         x2={pad - 120}
@@ -195,18 +201,16 @@ export function DimensionDrawing({ product, className }: { product: Product; cla
         fontSize={80}
         fill="var(--color-ink)"
         transform={`rotate(-90 ${pad - 160} ${pad + L / 2})`}
-        className="nums"
       >
         {formatNumber(L, "pl-PL", 0)} mm
       </text>
-      {/* profil */}
       <rect
         x={pad + W + sideGap}
         y={pad}
         width={sideW}
         height={L}
-        fill={flex ? "var(--color-flex)" : "var(--color-frame)"}
-        fillOpacity={flex ? 0.5 : 0.8}
+        rx={flex ? sideW / 2 : 0}
+        fill={flex ? segmentColor.flex : product.frame_color === "black" ? "#1a1d22" : "#c9d0d8"}
       />
       <text
         x={pad + W + sideGap + sideW / 2}
@@ -214,13 +218,35 @@ export function DimensionDrawing({ product, className }: { product: Product; cla
         textAnchor="middle"
         fontSize={80}
         fill="var(--color-ink)"
-        className="nums"
       >
         {T} mm
       </text>
       <text x={pad + W + sideGap + sideW / 2} y={pad + L + 140} textAnchor="middle" fontSize={56} fill={dim}>
-        profil (pogrubiony)
+        profil
       </text>
     </svg>
+  );
+}
+
+/** Legenda kolorów grup zastosowań. */
+export function SegmentLegend({
+  tone = "dark",
+  className = "",
+}: {
+  tone?: "dark" | "light";
+  className?: string;
+}) {
+  const keys: Segment[] = ["roof", "large", "flex"];
+  return (
+    <ul
+      className={`flex flex-wrap gap-x-6 gap-y-2 text-sm ${tone === "dark" ? "text-forest-300" : "text-muted"} ${className}`}
+    >
+      {keys.map((k) => (
+        <li key={k} className="flex items-center gap-2">
+          <span aria-hidden="true" className="h-2 w-6 rounded-full" style={{ background: segmentColor[k] }} />
+          {segmentLabel[k]}
+        </li>
+      ))}
+    </ul>
   );
 }

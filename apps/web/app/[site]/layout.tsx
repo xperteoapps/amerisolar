@@ -7,6 +7,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { MobileCta } from "@/components/mobile-cta";
 import { JsonLd, organizationLd, websiteLd } from "@/lib/seo/jsonld";
 import { absoluteUrl, isSiteKey, siteKeys, sites } from "@/lib/sites";
 import "../globals.css";
@@ -53,13 +54,14 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[si
 
   return (
     <html lang={site.htmlLang} className={`${archivo.variable} ${archivoExt.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col pb-[4.5rem] md:pb-0">
         <JsonLd data={[organizationLd(site), websiteLd(site)]} />
         <SiteHeader site={site} />
         <main id="tresc" className="flex-1">
           {children}
         </main>
         <SiteFooter site={site} />
+        <MobileCta />
         {/* Vercel Analytics działa bez cookies — dozwolone przed zgodą (CLAUDE.md §9). */}
         <Analytics />
         <SpeedInsights />

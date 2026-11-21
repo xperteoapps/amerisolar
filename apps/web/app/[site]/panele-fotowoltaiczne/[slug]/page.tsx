@@ -1,9 +1,9 @@
 // apps/web/app/[site]/panele-fotowoltaiczne/[slug]/page.tsx
 // Karta produktu (CLAUDE.md §5.2, MASTER_PROMPT Faza 1). Każda liczba z data/products.json.
 // Wyliczenia (kWp, Voc w mrozie) są opisane jako wyliczenia. Fakty z `to_verify` nie są publikowane.
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Breadcrumbs, Container, FaqAccordion, SpecTable } from "@amerisolar/ui";
+import Link from "next/link";
+import { Breadcrumbs, buttonClass, Container, FaqAccordion, SpecTable } from "@amerisolar/ui";
 import {
   formatNumber,
   getProductBySlug,
@@ -14,7 +14,7 @@ import {
   range,
   type Product,
 } from "@amerisolar/content";
-import { CtaBand } from "@/components/cta-band";
+import { CtaBand, InlineCta, rfqHref } from "@/components/cta-band";
 import { DimensionDrawing } from "@/components/module-drawing";
 import {
   CATALOG_PATH,
@@ -209,6 +209,18 @@ export default async function ProductPage({ params }: Props) {
                 </div>
               ))}
             </dl>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <Link href={rfqHref(p.model)} className={buttonClass("primary", "px-6 py-3.5 text-base")}>
+                Zapytaj o cenę kontenerową
+              </Link>
+              <a href="#parametry" className={buttonClass("ghost", "px-6 py-3.5 text-base")}>
+                Parametry techniczne
+              </a>
+            </div>
+            <p className="mt-4 text-sm text-muted">
+              Dostawy w ilościach kontenerowych bezpośrednio od producenta: {pieces(p, "40ft_hq")} szt. w
+              kontenerze 40&apos;HQ.
+            </p>
           </div>
           <DimensionDrawing product={p} className="mx-auto h-auto max-h-[30rem] w-full max-w-xs lg:mt-6" />
         </Container>
@@ -241,7 +253,7 @@ export default async function ProductPage({ params }: Props) {
       </section>
 
       {/* PARAMETRY ELEKTRYCZNE */}
-      <section className="border-t border-line py-16 sm:py-20">
+      <section id="parametry" className="scroll-mt-20 border-t border-line py-16 sm:py-20">
         <Container className="space-y-14">
           <h2 className="font-wide text-2xl font-semibold sm:text-3xl">Parametry elektryczne</h2>
           <SpecTable
@@ -370,6 +382,7 @@ export default async function ProductPage({ params }: Props) {
         <Container>
           <h2 className="font-wide text-2xl font-semibold sm:text-3xl">Porównanie z sąsiednimi modelami</h2>
           <Compare items={[p, ...neighbours(p)]} current={p.slug} />
+          <InlineCta text={`Potrzebujesz ${p.model} w ilości kontenerowej?`} model={p.model} />
         </Container>
       </section>
 

@@ -114,3 +114,19 @@ export function vocAt(p: Product, binIndex: number, t: number): number {
   const voc = p.stc.voc_v[binIndex]!;
   return voc * (1 + (p.temp_coeff.voc_pct_per_c / 100) * (t - 25));
 }
+
+/** Grupa zastosowań do kolorowania schematów i legend (z pola segment_pl w products.json). */
+export type Segment = "roof" | "large" | "flex";
+export const segmentOf = (p: Product): Segment =>
+  isFlexible(p) ? "flex" : powerRange(p).max > 500 ? "large" : "roof";
+export const segmentLabel: Record<Segment, string> = {
+  roof: "Dachy domów i firm, carporty",
+  large: "Dachy przemysłowe i farmy PV",
+  flex: "Linia elastyczna — dachy specjalne",
+};
+/** Kolory legend: zieleń i pomarańcz marki + błękit linii elastycznej. */
+export const segmentColor: Record<Segment, string> = {
+  roof: "#529e4a",
+  large: "#d07c35",
+  flex: "#7fb3d5",
+};
