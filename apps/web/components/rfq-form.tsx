@@ -19,6 +19,16 @@ export function RfqForm({ action, defaultModel }: { action: Action; defaultModel
   // Prefill modelu z ?model= (link z karty produktu) — bezpośrednio w DOM, bez stanu.
   useEffect(() => {
     const pm = new URLSearchParams(window.location.search).get("model") ?? defaultModel;
+    const q = new URLSearchParams(window.location.search);
+    // Ilość z kalkulatora kontenerów (?kwp=, ?containers=).
+    for (const [param, field] of [
+      ["kwp", "quantity_kwp"],
+      ["containers", "quantity_containers"],
+    ] as const) {
+      const v = q.get(param);
+      const el = formRef.current?.querySelector<HTMLInputElement>(`input[name="${field}"]`);
+      if (v && el && /^\d+([.,]\d+)?$/.test(v)) el.value = v;
+    }
     if (!pm || !modelOptions.includes(pm)) return;
     const box = formRef.current?.querySelector<HTMLInputElement>(
       `input[name="product_interest"][value="${CSS.escape(pm)}"]`,

@@ -17,9 +17,10 @@ import {
 } from "@amerisolar/content";
 import { BarList } from "@/components/bars";
 import { CertBadges } from "@/components/cert-badges";
+import { ContainerCalculator, type CalcModel } from "@/components/container-calculator";
 import { CtaBand, InlineCta, rfqHref } from "@/components/cta-band";
 import { MediaFigure } from "@/components/media-figure";
-import { ModuleLineup, SegmentLegend } from "@/components/module-drawing";
+import { DimensionDrawing, ModuleLineup, SegmentLegend } from "@/components/module-drawing";
 import {
   catalog,
   CATALOG_PATH,
@@ -109,6 +110,19 @@ const strVoc = industrial.stc.voc_v[strIdx]!;
 const strVocCold = vocAt(industrial, strIdx, -25);
 const str1500 = Math.floor(1500 / strVocCold);
 const str1000 = Math.floor(1000 / strVocCold);
+
+const calcModels: CalcModel[] = catalog.map((p) => {
+  const r = piecesPer(p, "40ft_hq");
+  return {
+    slug: p.slug,
+    model: p.model,
+    bins: p.power_bins_w,
+    pcsMin: r.min,
+    pcsMax: r.max,
+    flexible: isFlexible(p),
+    datasheet: datasheetFor(p.slug)?.file,
+  };
+});
 
 const homeFaq = [
   {
@@ -556,6 +570,29 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
               </Link>
             </div>
           </div>
+        </Container>
+      </section>
+
+      {/* 8b. KALKULATOR KONTENERÓW */}
+      <section id="kalkulator-kontenerow" className="scroll-mt-20 py-20 sm:py-28">
+        <Container>
+          <div className="mb-10 grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
+            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">Ile kontenerów potrzebujesz?</h2>
+            <p className="max-w-lg text-muted">
+              Wybierz moduł i klasę mocy, a potem wpisz moc instalacji albo liczbę kontenerów. Wynik
+              przeniesiesz jednym kliknięciem do zapytania o wycenę.
+            </p>
+          </div>
+          <ContainerCalculator
+            models={calcModels}
+            rfqPath={RFQ_PATH}
+            drawings={Object.fromEntries(
+              catalog.map((p) => [
+                p.slug,
+                <DimensionDrawing key={p.slug} product={p} className="h-auto w-full" />,
+              ]),
+            )}
+          />
         </Container>
       </section>
 
