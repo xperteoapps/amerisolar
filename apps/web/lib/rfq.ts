@@ -5,11 +5,11 @@ import { z } from "zod";
 import { products } from "@amerisolar/content";
 
 export const leadTypes = [
-  { value: "installer", label: "Instalator / firma montażowa" },
+  { value: "distributor", label: "Hurtownia / dystrybutor OZE" },
+  { value: "trader", label: "Trader / importer" },
+  { value: "installer", label: "Firma montażowa" },
   { value: "epc", label: "EPC / deweloper farm PV" },
-  { value: "distributor", label: "Hurtownia / dystrybutor" },
   { value: "business", label: "Firma — własny obiekt" },
-  { value: "homeowner", label: "Właściciel domu" },
 ] as const;
 
 export const timelines = [
@@ -30,7 +30,7 @@ const optNum = z.preprocess(
 
 export const rfqSchema = z
   .object({
-    type: z.enum(["installer", "epc", "distributor", "business", "homeowner"], {
+    type: z.enum(["distributor", "trader", "installer", "epc", "business"], {
       message: "Wybierz, kim jesteś.",
     }),
     product_interest: z.array(z.enum(modelOptions as [string, ...string[]])).default([]),
@@ -65,13 +65,10 @@ export const rfqSchema = z
     utm_term: z.preprocess(emptyToUndef, z.string().max(200).optional()),
     utm_content: z.preprocess(emptyToUndef, z.string().max(200).optional()),
   })
-  .refine(
-    (d) => d.type === "homeowner" || d.quantity_kwp !== undefined || d.quantity_containers !== undefined,
-    {
-      message: "Podaj ilość w kWp albo liczbę kontenerów.",
-      path: ["quantity_kwp"],
-    },
-  );
+  .refine((d) => d.quantity_kwp !== undefined || d.quantity_containers !== undefined, {
+    message: "Podaj ilość w kWp albo liczbę kontenerów.",
+    path: ["quantity_kwp"],
+  });
 
 export type RfqInput = z.infer<typeof rfqSchema>;
 
@@ -83,7 +80,7 @@ export type RfqState =
 /** Prosty scoring (docelowo edge function `lead-score`, CLAUDE.md §3). */
 export function scoreLead(d: RfqInput): number {
   let s = 0;
-  s += { epc: 40, distributor: 35, installer: 25, business: 20, homeowner: 0 }[d.type];
+  s += { distributor: 40, trader: 40, epc: 35, installer: 30, business: 20 }[d.type];
   const kwp = d.quantity_kwp ?? (d.quantity_containers ? d.quantity_containers * 400 : 0);
   if (kwp >= 1000) s += 40;
   else if (kwp >= 400) s += 30;

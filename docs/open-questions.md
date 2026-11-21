@@ -17,7 +17,8 @@
 
 ## Oferta
 
-- [ ] Magazyn w PL? Dostawy paletowe czy tylko kontenery? Incoterms dla klientów PL.
+- [x] Magazyn w PL: brak — sprzedaż wyłącznie kontenerowa, bezpośrednio od producenta (21.11.2026).
+- [ ] Incoterms dla klientów PL i minimalne zamówienie (kontener 20' czy 40'HQ).
 - [ ] Polityka cenowa (domyślnie „Cena na zapytanie”); aktualny cennik po 30.10.2026.
 
 ## Produkty (blokują publikację faktów)

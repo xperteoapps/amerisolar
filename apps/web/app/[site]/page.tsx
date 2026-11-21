@@ -60,6 +60,7 @@ const pMin = Math.min(...allPowers);
 const pMax = Math.max(...allPowers);
 const effMax = Math.max(...catalog.map(maxEfficiency));
 const hq = catalog.map((p) => ({ p, k: kwpPer(p, "40ft_hq", powerRange(p).max) }));
+const palletPcs = catalog.map((p) => piecesPer(p, "pallet").min);
 const hqPcs = catalog.flatMap((p) => {
   const r = piecesPer(p, "40ft_hq");
   return [r.min, r.max];
@@ -140,9 +141,19 @@ const homeFaq = [
     answer: `Rozważ linię elastyczną: ok. 3 kg/m², ${flexHeadline.dimensions_mm[2]} mm grubości, montaż przez klejenie bez przewiertów. Dobór na konkretny obiekt wymaga oceny konstruktora — prześlij nam opis dachu w zapytaniu.`,
   },
   {
-    question: "Sprzedajecie moduły klientom indywidualnym?",
+    question: "Czy macie magazyn w Polsce?",
     answer:
-      "Dostawy kontenerowe kierujemy do firm: instalatorów, EPC, hurtowni i właścicieli obiektów. Jeśli planujesz instalację na domu, napisz — wskażemy instalatora, który pracuje na modułach Amerisolar.",
+      "Nie. Moduły zamawiasz w ilościach kontenerowych bezpośrednio od producenta — dzięki temu cena dotyczy całej partii, bez kosztów magazynu pośredniego. Warunki i miejsce dostawy ustalamy w ofercie.",
+  },
+  {
+    question: "Jakie jest minimalne zamówienie?",
+    answer:
+      "Sprzedajemy w ilościach kontenerowych. Ile modułów i kWp mieści kontener 20' i 40'HQ dla każdego modelu, pokazuje tabela powyżej; dokładne minimum dla wybranego modelu podajemy w ofercie.",
+  },
+  {
+    question: "Komu sprzedajecie moduły?",
+    answer:
+      "Firmom kupującym w ilościach kontenerowych: hurtowniom i dystrybutorom OZE, traderom i importerom oraz firmom montażowym i EPC realizującym duże wolumeny.",
   },
   {
     question: "Jaka jest cena paneli?",
@@ -180,8 +191,8 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
           <div className="mt-8 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <p className="max-w-xl text-lg leading-relaxed text-white/85">
               Moduły TOPCon N-type od {pMin} do {pMax} W, bifacjalne, double glass i linia elastyczna{" "}
-              {flexHeadline.dimensions_mm[2]} mm. Dla instalatorów, EPC, deweloperów farm fotowoltaicznych i
-              hurtowni.
+              {flexHeadline.dimensions_mm[2]} mm. Dla hurtowni, traderów i firm montażowych kupujących w
+              ilościach kontenerowych.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href={RFQ_PATH} className={buttonClass("primary", "px-6 py-3.5 text-base")}>
@@ -277,42 +288,43 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       <section className="border-t border-line bg-paper py-20 sm:py-28">
         <Container>
           <h2 className="font-wide max-w-3xl text-3xl font-semibold sm:text-4xl">
-            Dla instalatorów, farm fotowoltaicznych i hurtowni OZE
+            Dla hurtowni, traderów i firm montażowych kupujących w dużych ilościach
           </h2>
-          <div className="mt-14 grid gap-12 md:grid-cols-3">
-            <Segment
-              color={segmentColor.roof}
-              title="Instalatorzy i firmy montażowe"
-              value={range(roofMin, roofMax, "W")}
-              valueLabel="moduły na dachy domów, firm i carporty"
-              href={rfqHref()}
-              cta="Zapytaj o kontener"
-            >
-              Kompaktowe moduły TOPCon, w tym bifacjalny {by("as-7m120n-bhc").model} na carporty i dachy
-              płaskie. Kontener to zapas modułów jednego typu na wiele realizacji.
-            </Segment>
-            <Segment
-              color={segmentColor.large}
-              title="Farmy PV, EPC i deweloperzy"
-              value={`${kwpLabel(farm, "40ft_hq")} kWp`}
-              valueLabel={`w kontenerze 40'HQ modułów ${farm.model} ${powerRange(farm).max} W (wyliczenie)`}
-              href={rfqHref(farm.model)}
-              cta={`Zapytaj o ${farm.model}`}
-            >
-              Bifacjalny double glass {range(powerRange(farm).min, powerRange(farm).max, "W")}, sprawność do{" "}
-              {percent(maxEfficiency(farm))}, napięcie systemu {farm.max_system_voltage_v.replace(" DC", "")}{" "}
-              V DC.
-            </Segment>
+          <div className="mt-14 grid gap-8 md:grid-cols-3">
             <Segment
               color="var(--color-ink)"
-              title="Hurtownie i dystrybutorzy"
+              title="Hurtownie i dystrybutorzy OZE"
               value={`${formatNumber(Math.min(...hqPcs), "pl-PL", 0)}–${formatNumber(Math.max(...hqPcs), "pl-PL", 0)}`}
               valueLabel="modułów w kontenerze 40'HQ, zależnie od modelu"
               href={rfqHref()}
               cta="Zapytaj o warunki hurtowe"
             >
-              Pełna linia w jednym źródle — od modułów dachowych po farmowe i elastyczne — z dokumentacją do
-              dalszej sprzedaży.
+              Pełna linia w jednym źródle — od modułów dachowych po farmowe i elastyczne. Karty katalogowe i
+              certyfikaty do dalszej sprzedaży, moduły pakowane na paletach po {Math.min(...palletPcs)}–
+              {Math.max(...palletPcs)} sztuk.
+            </Segment>
+            <Segment
+              color={segmentColor.large}
+              title="Traderzy i importerzy"
+              value={`${formatNumber(kwpMin)}–${formatNumber(kwpMax)} kWp`}
+              valueLabel="w jednym kontenerze 40'HQ, zależnie od modelu (wyliczenie)"
+              href={rfqHref()}
+              cta="Zapytaj o dostawy wielokontenerowe"
+            >
+              Zakup kontenerowy bezpośrednio od producenta, bez pośredniczącej hurtowni. Specyfikację, klasy
+              mocy i warunki dostawy ustalamy dla całej partii.
+            </Segment>
+            <Segment
+              color={segmentColor.roof}
+              title="Firmy montażowe i EPC"
+              value={`${kwpLabel(farm, "40ft_hq")} kWp`}
+              valueLabel={`w kontenerze modułów ${farm.model} ${powerRange(farm).max} W (wyliczenie)`}
+              href={rfqHref(farm.model)}
+              cta="Zapytaj o dostawę na projekt"
+            >
+              Moduły {range(roofMin, roofMax, "W")} na dachy firm i carporty oraz{" "}
+              {range(powerRange(industrial).min, powerRange(farm).max, "W")} na dachy przemysłowe i farmy
+              fotowoltaiczne. Kontener to zapas jednego typu modułu na wiele realizacji.
             </Segment>
           </div>
         </Container>

@@ -10,7 +10,7 @@
 create type public.content_status as enum ('draft', 'review', 'published', 'archived');
 create type public.page_type      as enum ('page', 'landing', 'category', 'tool', 'post', 'legal');
 create type public.document_type  as enum ('datasheet', 'certificate', 'manual', 'warranty');
-create type public.lead_type      as enum ('installer', 'epc', 'distributor', 'business', 'homeowner');
+create type public.lead_type      as enum ('distributor', 'trader', 'installer', 'epc', 'business', 'homeowner');
 create type public.lead_status    as enum ('new', 'qualified', 'contacted', 'quoted', 'won', 'lost', 'spam');
 create type public.media_source   as enum ('photo', 'higgsfield', 'manufacturer');
 create type public.search_intent  as enum ('transactional', 'commercial', 'informational', 'navigational');

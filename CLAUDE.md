@@ -19,14 +19,16 @@
 
 Budujemy sieć stron krajowych promujących moduły fotowoltaiczne **Amerisolar** (Worldwide Energy and Manufacturing USA Co., Ltd.). Strony mają **ściągać ruch organiczny i zamieniać go na zapytania ofertowe (leady)**. Zaczynamy od Polski, potem kolejne kraje na tym samym kodzie.
 
+**Model sprzedaży (decyzja klienta, 21.11.2026):** wyłącznie **ilości kontenerowe, bezpośrednio od producenta**. **Brak magazynu w Polsce** — nie oferujemy sprzedaży paletowej z magazynu; dane o paletach pokazujemy tylko jako informację o pakowaniu.
+
 **Główna grupa docelowa (B2B, priorytet):**
 
-1. Instalatorzy i firmy montażowe PV: zakup paletowy i kontenerowy.
-2. EPC, deweloperzy farm PV, inwestorzy: moduły 600–720 W, bifacjalne, double glass.
-3. Hurtownie i dystrybutorzy OZE.
+1. Hurtownie i dystrybutorzy OZE.
+2. Traderzy i importerzy kupujący duże wolumeny (wiele kontenerów).
+3. Firmy montażowe i EPC realizujące duże ilości (dachy przemysłowe, farmy PV, moduły 600–720 W, bifacjalne, double glass).
 4. Właściciele i zarządcy obiektów, na których klasyczny moduł się nie sprawdza: dachy o niskiej nośności, obiekty z drganiami i obciążeniem dynamicznym (stadiony, hale sportowe, areny, obiekty przemysłowe z maszynami), dachy łukowe. Dla nich jest **linia elastyczna**: 2 mm, ok. 3 kg/m², montaż klejony bez przewiertów. Szczegóły w §4A.
 
-**Grupa wtórna (B2C):** właściciele domów. Kierujemy ich do sieci instalatorów-partnerów, a nie do sprzedaży bezpośredniej.
+**B2C:** nie jest grupą docelową (brak sprzedaży detalicznej i magazynu w PL).
 
 Uzasadnienie: cennik producenta jest kontenerowy (FOB, minimum 1×40'). Polski rynek prosumencki zwolnił po zakończeniu programu Mój Prąd. Wzrost mocy PV w Polsce napędzają głównie instalacje powyżej 1 MW.
 
@@ -103,7 +105,7 @@ Minimalny schemat, który rozszerzamy migracjami (stan bazowy: `supabase/migrati
 Slugi po polsku, bez polskich znaków, małymi literami, z myślnikami. Maksymalnie 3 poziomy.
 
 ```
-/                                         Strona główna (B2B: „Moduły PV Amerisolar — dostawy paletowe i kontenerowe”)
+/                                         Strona główna (B2B, H1: „Panele fotowoltaiczne Amerisolar w hurcie — kontenery od producenta”)
 /panele-fotowoltaiczne/                   Katalog z filtrami (moc, technologia, bifacjalne, elastyczne, kolor ramy)
   /panele-fotowoltaiczne/topcon/          Kategorie = landing pages pod klastry fraz
   /panele-fotowoltaiczne/bifacjalne/
@@ -138,9 +140,9 @@ Slugi po polsku, bez polskich znaków, małymi literami, z myślnikami. Maksymal
 /polityka-prywatnosci/  /cookies/  /regulamin/
 ```
 
-**CTA na każdej stronie:** „Zapytaj o cenę kontenerową” (główne), „Pobierz kartę katalogową” (lead magnet: PDF po podaniu e-maila jest opcjonalny, bo karty muszą być też dostępne bez bramki), „Porozmawiaj z inżynierem”. Na mobile przycisk „Zapytaj o ofertę” jest przyklejony do dołu ekranu.
+**CTA na każdej stronie:** „Zapytaj o cenę kontenerową” (główne, prefill modelu `?model=`), „Pobierz kartę katalogową” (lead magnet: PDF po podaniu e-maila jest opcjonalny, bo karty muszą być też dostępne bez bramki), „Porozmawiaj z inżynierem”. Na mobile przycisk „Zapytaj o ofertę” jest przyklejony do dołu ekranu.
 
-**Formularz RFQ (krokowy):** 1) kim jesteś (instalator / EPC / hurtownia / firma / dom), 2) model(e) i ilość (kWp lub palety lub kontenery), 3) miejsce dostawy i termin, 4) kontakt + NIP (opcjonalnie) + zgody RODO. Zapisujemy UTM i landing page.
+**Formularz RFQ (krokowy):** 1) kim jesteś (hurtownia / trader / firma montażowa / EPC / firma), 2) model(e) i ilość (kWp lub palety lub kontenery), 3) miejsce dostawy i termin, 4) kontakt + NIP (opcjonalnie) + zgody RODO. Zapisujemy UTM i landing page.
 
 ---
 
@@ -348,7 +350,8 @@ Bieżąca lista: `docs/open-questions.md`.
 - [ ] Status prawny partnera wobec Amerisolar i zgoda na użycie znaku i domen
 - [x] Strategia domen: ccTLD per kraj (PL: `amerisolar.pl`)
 - [ ] Dane firmy (nazwa, NIP, adres, telefon, e-mail handlowy, osoby do sekcji „Zespół”)
-- [ ] Magazyn w PL? Dostawy paletowe z magazynu czy tylko kontenery? Incoterms dla klientów PL (DDP / DAP / EXW magazyn)
+- [x] Magazyn w PL: **brak**; sprzedaż wyłącznie kontenerowa, bezpośrednio od producenta
+- [ ] Incoterms dla klientów PL (FOB / CIF / DAP / DDP) i minimalna ilość zamówienia (20' czy 40'HQ)
 - [ ] Polityka cenowa na stronie (cena na zapytanie vs „od … zł/Wp”) i aktualny cennik po 30.10.2026
 - [ ] Certyfikaty IEC/TÜV dla modeli spoza certyfikatu Z2 093522 0030, aktualne karty (730 W, modele bez kart)
 - [ ] Prawdziwe zdjęcia produktów, fabryki i polskich realizacji + zgody na publikację
