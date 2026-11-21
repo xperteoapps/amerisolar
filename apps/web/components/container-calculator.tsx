@@ -40,11 +40,14 @@ export function ContainerCalculator({
 
   const kwpPerContainer = (m.pcsMin * bin) / 1000; // ostrożnie: dolna liczba sztuk
   const kwpPerContainerMax = (m.pcsMax * bin) / 1000;
+  // Sprzedaż wyłącznie kontenerowa: minimalna moc = jeden pełny kontener wybranego modułu.
+  const minMw = kwpPerContainer / 1000;
+  const mwEff = Math.max(mw, minMw);
 
   const result = useMemo(() => {
     if (mode === "power") {
-      const kwp = mw * 1000;
-      const modules = Math.ceil((kwp * 1000) / bin);
+      const kwp = mwEff * 1000;
+      const modules = Math.ceil((kwp * 1000) / bin - 1e-6);
       const exact = modules / m.pcsMin;
       const full = Math.ceil(exact - 1e-9);
       const lastFill = exact - Math.floor(exact - 1e-9);
@@ -52,7 +55,7 @@ export function ContainerCalculator({
     }
     const modules = containers * m.pcsMin;
     return { modules, containers, lastFill: 1, kwp: (modules * bin) / 1000 };
-  }, [mode, mw, containers, bin, m.pcsMin]);
+  }, [mode, mwEff, containers, bin, m.pcsMin]);
 
   const pickModel = (s: string) => {
     const next = models.find((x) => x.slug === s)!;
@@ -119,6 +122,9 @@ export function ContainerCalculator({
         {/* 3. Tryb + wartość */}
         <fieldset className="mt-7">
           <legend className="text-sm font-semibold text-forest-300">3. Co znasz?</legend>
+          <p className="mt-1 text-xs text-white/55">
+            Sprzedajemy w ilościach kontenerowych — minimum to jeden kontener.
+          </p>
           <div className="mt-3 inline-flex rounded-full border border-white/25 p-1 text-sm">
             {(
               [
@@ -146,11 +152,11 @@ export function ContainerCalculator({
                   <input
                     id="calc-mw-num"
                     type="number"
-                    min={0.1}
+                    min={minMw}
                     max={100}
-                    step={0.1}
-                    value={mw}
-                    onChange={(e) => setMw(Math.max(0.1, Math.min(100, Number(e.target.value) || 0.1)))}
+                    step={0.001}
+                    value={mwEff === minMw ? Number(minMw.toFixed(5)) : mwEff}
+                    onChange={(e) => setMw(Math.max(minMw, Math.min(100, Number(e.target.value) || minMw)))}
                     className="nums w-24 rounded-(--radius-sm) border border-white/30 bg-transparent px-2 py-1 text-right text-2xl font-semibold"
                     aria-label="Moc instalacji w MWp"
                   />
@@ -160,15 +166,15 @@ export function ContainerCalculator({
               <input
                 id="calc-mw"
                 type="range"
-                min={0.1}
+                min={minMw}
                 max={20}
-                step={0.1}
-                value={Math.min(mw, 20)}
+                step={0.001}
+                value={Math.min(mwEff, 20)}
                 onChange={(e) => setMw(Number(e.target.value))}
                 className="mt-4 w-full accent-sun"
               />
               <div className="nums mt-1 flex justify-between text-xs text-white/50">
-                <span>0,1 MWp</span>
+                <span>{nf(minMw, 3)} MWp (1 kontener)</span>
                 <span>20 MWp</span>
               </div>
             </div>
