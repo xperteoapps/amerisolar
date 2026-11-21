@@ -16,6 +16,8 @@ import {
 } from "@amerisolar/content";
 import { CtaBand, InlineCta, rfqHref } from "@/components/cta-band";
 import { DimensionDrawing } from "@/components/module-drawing";
+import { DocLink } from "@/components/doc-link";
+import { certificatesForModel, datasheetFor } from "@/lib/documents";
 import {
   CATALOG_PATH,
   certificatesFor,
@@ -371,7 +373,18 @@ export default async function ProductPage({ params }: Props) {
                   </li>
                 ))}
               </ul>
-              {/* TODO(klient): PDF karty katalogowej w Supabase Storage (bucket documents) — link do pobrania. */}
+              <div className="mt-6 flex flex-col items-start gap-3">
+                {datasheetFor(p.slug) ? <DocLink doc={datasheetFor(p.slug)!} /> : null}
+                {certificatesForModel(p.model).map((c) => (
+                  <DocLink key={c.file} doc={c} />
+                ))}
+                <Link
+                  href="/certyfikaty-i-dokumenty/"
+                  className="text-sm font-semibold text-forest-700 hover:underline"
+                >
+                  Wszystkie karty katalogowe i certyfikaty
+                </Link>
+              </div>
             </div>
           </div>
         </Container>

@@ -34,7 +34,7 @@ export const plRoutes: RouteEntry[] = [
     path: "/certyfikaty-i-dokumenty/",
     label: "Certyfikaty i dokumenty",
     nav: "footer",
-    ready: false,
+    ready: true,
     sitemap: "pages",
   },
   { path: "/o-amerisolar/", label: "O Amerisolar", nav: "footer", ready: false, sitemap: "pages" },

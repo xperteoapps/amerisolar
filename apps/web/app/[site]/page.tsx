@@ -722,9 +722,14 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       {/* 14. GWARANCJE I PRODUCENT */}
       <section className="py-20 sm:py-28">
         <Container>
-          <h2 className="font-wide max-w-2xl text-3xl font-semibold sm:text-4xl">
-            Gwarancje, normy i producent
-          </h2>
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <h2 className="font-wide max-w-2xl text-3xl font-semibold sm:text-4xl">
+              Gwarancje, normy i producent
+            </h2>
+            <Link href="/certyfikaty-i-dokumenty/" className={buttonClass("ghost")}>
+              Karty katalogowe i certyfikaty do pobrania
+            </Link>
+          </div>
           <div className="mt-12 grid gap-12 md:grid-cols-3">
             <div className="border-t border-ink/80 pt-6">
               <h3 className="font-semibold">Gwarancje</h3>

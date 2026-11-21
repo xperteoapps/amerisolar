@@ -1,0 +1,7 @@
+{
+  "_meta": {
+    "rule": "Rejestr plików do pobrania. Pliki leżą w apps/web/public/dokumenty/. Wpis dodajemy dopiero, gdy plik jest w repo — strona pokazuje link tylko dla istniejących wpisów."
+  },
+  "datasheets": {},
+  "certificates": []
+}
