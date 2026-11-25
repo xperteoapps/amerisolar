@@ -12,6 +12,7 @@
 ## Firma i marka
 
 - [ ] Status prawny wobec Amerisolar, zgoda na użycie znaku i domeny amerisolar.pl (CLAUDE.md §9).
+- [x] Zgoda producenta na publikację kart katalogowych bez danych kontaktowych producenta w stopce: potwierdzona przez klienta 2026-11-25 (dołączyć kopię zgody na piśmie). Wersje bez kontaktu: `apps/web/public/dokumenty/*-karta-katalogowa.pdf`; oryginały: `assets/source/`.
 - [ ] Dane firmy: nazwa, NIP, KRS, adres, telefon, e-mail handlowy, osoby do sekcji „Zespół”.
 - [ ] Logo Amerisolar (SVG) i kolory marki — obecnie tokeny tymczasowe w `packages/ui/src/tokens.css`.
 

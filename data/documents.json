@@ -15,42 +15,42 @@
       "title": "Karta katalogowa AS-7M120N-HC",
       "version": "EN-V1.0-2024",
       "lang": "EN",
-      "sizeKb": 975
+      "sizeKb": 974
     },
     "as-7m120n-bhc": {
       "file": "/dokumenty/amerisolar-as-7m120n-bhc-karta-katalogowa.pdf",
       "title": "Karta katalogowa AS-7M120N-BHC",
       "version": "EN-V1.0-2024",
       "lang": "EN",
-      "sizeKb": 1010
+      "sizeKb": 1008
     },
     "as-7m144n-hc": {
       "file": "/dokumenty/amerisolar-as-7m144n-hc-karta-katalogowa.pdf",
       "title": "Karta katalogowa AS-7M144N-HC",
       "version": "EN-V1.0-2024",
       "lang": "EN",
-      "sizeKb": 986
+      "sizeKb": 985
     },
     "as-8m132n-bhc": {
       "file": "/dokumenty/amerisolar-as-8m132n-bhc-karta-katalogowa.pdf",
       "title": "Karta katalogowa AS-8M132N-BHC",
       "version": "EN-V1.0-2024",
       "lang": "EN",
-      "sizeKb": 1065
+      "sizeKb": 994
     },
     "as-7m144nfl-hc-black": {
       "file": "/dokumenty/amerisolar-as-7m144nfl-hc-black-karta-katalogowa.pdf",
       "title": "Karta katalogowa AS-7M144NFL-HC Black",
       "version": "EN-V1.0-2025",
       "lang": "EN",
-      "sizeKb": 774
+      "sizeKb": 757
     },
     "as-7m132fl-hc": {
       "file": "/dokumenty/amerisolar-as-7m132fl-hc-karta-katalogowa.pdf",
       "title": "Karta katalogowa AS-7M132FL-HC",
       "version": "EN-V1.0-2025",
       "lang": "EN",
-      "sizeKb": 1274
+      "sizeKb": 1271
     }
   },
   "certificates": [
