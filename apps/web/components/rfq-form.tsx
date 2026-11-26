@@ -4,7 +4,8 @@
 // z sekcjami — bez ukrywania pól, więc jest dostępny i działa przy wolnym JS.
 import { useActionState, useEffect, useRef } from "react";
 import { buttonClass } from "@amerisolar/ui";
-import { leadTypes, modelOptions, timelines, type RfqState } from "@/lib/rfq";
+import { leadTypeValues, modelOptions, timelineValues, type RfqState } from "@/lib/rfq";
+import type { Messages } from "@/messages";
 
 type Action = (prev: RfqState, form: FormData) => Promise<RfqState>;
 
@@ -16,10 +17,12 @@ export function RfqForm({
   action,
   defaultModel,
   fallbackEmail,
+  t,
 }: {
   action: Action;
   defaultModel?: string;
   fallbackEmail?: string | null;
+  t: Messages["form"];
 }) {
   const [state, serverAction, pending] = useActionState(action, { status: "idle" } as RfqState);
   const formRef = useRef<HTMLFormElement>(null);
@@ -66,13 +69,11 @@ export function RfqForm({
   if (state.status === "ok") {
     return (
       <div role="status" className="rounded-(--radius-md) border border-leaf bg-forest-100/60 p-8">
-        <h2 className="font-wide text-2xl font-semibold">Zapytanie wysłane</h2>
-        <p className="mt-3 max-w-prose text-muted">
-          Dziękujemy. Odpowiemy na podany adres e-mail z ofertą lub pytaniami doprecyzowującymi.
-        </p>
+        <h2 className="font-wide text-2xl font-semibold">{t.okTitle}</h2>
+        <p className="mt-3 max-w-prose text-muted">{t.okText}</p>
         {fallbackEmail ? (
           <p className="mt-3 max-w-prose text-muted">
-            W pilnej sprawie napisz na{" "}
+            {t.okUrgent}{" "}
             <a href={`mailto:${fallbackEmail}`} className="font-semibold text-ink underline">
               {fallbackEmail}
             </a>
@@ -88,21 +89,21 @@ export function RfqForm({
       {/* honeypot */}
       <div aria-hidden="true" className="absolute -left-[9999px]">
         <label>
-          Strona www
+          {t.honeypot}
           <input type="text" name="website" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
 
       <fieldset>
-        <legend className="font-wide text-xl font-semibold">1. Kim jesteś</legend>
+        <legend className="font-wide text-xl font-semibold">{t.s1}</legend>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {leadTypes.map((t) => (
+          {leadTypeValues.map((v) => (
             <label
-              key={t.value}
+              key={v}
               className="flex cursor-pointer items-center gap-3 rounded-(--radius-sm) border border-ink/20 px-4 py-3 has-[:checked]:border-forest-700 has-[:checked]:bg-forest-100/60"
             >
-              <input type="radio" name="type" value={t.value} required className="accent-forest-700" />
-              {t.label}
+              <input type="radio" name="type" value={v} required className="accent-forest-700" />
+              {t.types[v]}
             </label>
           ))}
         </div>
@@ -110,7 +111,7 @@ export function RfqForm({
       </fieldset>
 
       <fieldset>
-        <legend className="font-wide text-xl font-semibold">2. Moduły i ilość</legend>
+        <legend className="font-wide text-xl font-semibold">{t.s2}</legend>
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
           {modelOptions.map((m) => (
             <label key={m} className="flex items-center gap-3 py-1.5">
@@ -128,28 +129,28 @@ export function RfqForm({
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
           <div>
             <label htmlFor="quantity_kwp" className={label}>
-              Ilość w kWp
+              {t.qtyKwp}
             </label>
             <input
               id="quantity_kwp"
               name="quantity_kwp"
               inputMode="decimal"
               className={input}
-              placeholder="np. 400"
+              placeholder={t.qtyKwpPh}
               aria-describedby="quantity_kwp-error"
             />
             {fieldError("quantity_kwp")}
           </div>
           <div>
             <label htmlFor="quantity_containers" className={label}>
-              albo liczba kontenerów
+              {t.qtyContainers}
             </label>
             <input
               id="quantity_containers"
               name="quantity_containers"
               inputMode="decimal"
               className={input}
-              placeholder="np. 1"
+              placeholder={t.qtyContainersPh}
             />
             {fieldError("quantity_containers")}
           </div>
@@ -157,28 +158,28 @@ export function RfqForm({
       </fieldset>
 
       <fieldset>
-        <legend className="font-wide text-xl font-semibold">3. Dostawa i termin</legend>
+        <legend className="font-wide text-xl font-semibold">{t.s3}</legend>
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <div>
             <label htmlFor="delivery_location" className={label}>
-              Miejsce dostawy
+              {t.delivery}
             </label>
             <input
               id="delivery_location"
               name="delivery_location"
               className={input}
-              placeholder="miejscowość lub kod pocztowy"
+              placeholder={t.deliveryPh}
             />
           </div>
           <div>
             <label htmlFor="timeline" className={label}>
-              Termin
+              {t.timeline}
             </label>
             <select id="timeline" name="timeline" className={input} defaultValue="">
-              <option value="">Wybierz</option>
-              {timelines.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
+              <option value="">{t.choose}</option>
+              {timelineValues.map((v) => (
+                <option key={v} value={v}>
+                  {t.timelines[v]}
                 </option>
               ))}
             </select>
@@ -187,11 +188,11 @@ export function RfqForm({
       </fieldset>
 
       <fieldset>
-        <legend className="font-wide text-xl font-semibold">4. Kontakt</legend>
+        <legend className="font-wide text-xl font-semibold">{t.s4}</legend>
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <div>
             <label htmlFor="name" className={label}>
-              Imię i nazwisko *
+              {t.name}
             </label>
             <input
               id="name"
@@ -205,7 +206,7 @@ export function RfqForm({
           </div>
           <div>
             <label htmlFor="email" className={label}>
-              E-mail *
+              {t.email}
             </label>
             <input
               id="email"
@@ -220,49 +221,42 @@ export function RfqForm({
           </div>
           <div>
             <label htmlFor="phone" className={label}>
-              Telefon
+              {t.phone}
             </label>
             <input id="phone" name="phone" type="tel" autoComplete="tel" className={input} />
           </div>
           <div>
             <label htmlFor="company" className={label}>
-              Firma
+              {t.company}
             </label>
             <input id="company" name="company" autoComplete="organization" className={input} />
           </div>
           <div>
             <label htmlFor="nip" className={label}>
-              NIP
+              {t.vatId}
             </label>
-            <input id="nip" name="nip" inputMode="numeric" className={input} aria-describedby="nip-error" />
+            <input id="nip" name="nip" className={input} aria-describedby="nip-error" />
             {fieldError("nip")}
           </div>
         </div>
         <div className="mt-5">
           <label htmlFor="message" className={label}>
-            Wiadomość
+            {t.message}
           </label>
-          <textarea
-            id="message"
-            name="message"
-            rows={4}
-            className={input}
-            placeholder="np. klasa mocy, typ projektu, wymagane dokumenty"
-          />
+          <textarea id="message" name="message" rows={4} className={input} placeholder={t.messagePh} />
         </div>
         <div className="mt-6 space-y-3 text-sm text-muted">
           <label className="flex gap-3">
             <input type="checkbox" name="consent_contact" required className="mt-1 accent-forest-700" />
             <span>
-              * Zgadzam się na kontakt w sprawie tego zapytania.{" "}
-              {/* TODO(klient): administrator danych i link do polityki prywatności */}
-              Administratorem danych jest TODO(klient): nazwa firmy.
+              {t.consent} {/* TODO(klient): administrator danych i link do polityki prywatności */}
+              {t.consentAdmin}
             </span>
           </label>
           {fieldError("consent_contact")}
           <label className="flex gap-3">
             <input type="checkbox" name="consent_marketing" className="mt-1 accent-forest-700" />
-            <span>Chcę otrzymywać informacje o dostępności modułów i nowych dostawach (opcjonalnie).</span>
+            <span>{t.marketing}</span>
           </label>
         </div>
       </fieldset>
@@ -277,7 +271,7 @@ export function RfqForm({
       ) : null}
 
       <button type="submit" disabled={pending} className={buttonClass("primary", "px-7 py-3.5 text-base")}>
-        {pending ? "Wysyłanie…" : "Wyślij zapytanie"}
+        {pending ? t.sending : t.submit}
       </button>
     </form>
   );

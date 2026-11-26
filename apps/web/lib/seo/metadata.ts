@@ -2,21 +2,18 @@
 // Generator metadata wg CLAUDE.md §5.1: unikalny title ≤60, description ≤155,
 // canonical, og:*, hreflang + x-default, noindex dla serwisów przed startem.
 import type { Metadata } from "next";
-import { absoluteUrl, sites, type Site, type SiteKey } from "../sites";
+import { localPath, type RouteId } from "../routes";
+import { absoluteUrl, sites, X_DEFAULT_SITE, type Site, type SiteKey } from "../sites";
 
 export const TITLE_MAX = 60;
 export const DESCRIPTION_MAX = 155;
 
 export type PageSeo = {
   site: Site;
-  /** Ścieżka bez domeny, z końcowym ukośnikiem, np. "/panele-fotowoltaiczne/". */
-  path: string;
+  /** Trasa strony — z niej liczymy lokalną ścieżkę, canonical i hreflang wszystkich serwisów. */
+  route: { id: RouteId; sub?: string };
   title: string;
   description: string;
-  /** Odpowiedniki strony w innych krajach (hreflang). Klucz = serwis. */
-  alternates?: Partial<Record<SiteKey, string>>;
-  /** Serwis/ścieżka dla x-default (domyślnie: brak, gdy jest tylko jeden kraj). */
-  xDefault?: { site: SiteKey; path: string };
   ogImage?: string;
   type?: "website" | "article";
   noindex?: boolean;
@@ -32,16 +29,14 @@ export function buildMetadata(seo: PageSeo): Metadata {
   assertLength("title", seo.title, TITLE_MAX);
   assertLength("description", seo.description, DESCRIPTION_MAX);
 
-  const canonical = absoluteUrl(seo.site, seo.path);
+  const { id, sub } = seo.route;
+  const canonical = absoluteUrl(seo.site, localPath(seo.site.lang, id, sub));
+  // hreflang: odpowiednik strony w każdym serwisie + x-default (serwis EU po angielsku).
   const languages: Record<string, string> = {};
-  for (const [key, path] of Object.entries(seo.alternates ?? {})) {
-    const alt = sites[key as SiteKey];
-    if (alt && path) languages[alt.locale] = absoluteUrl(alt, path);
-  }
-  if (Object.keys(languages).length > 0) {
-    languages[seo.site.locale] = canonical;
-    if (seo.xDefault) languages["x-default"] = absoluteUrl(sites[seo.xDefault.site], seo.xDefault.path);
-  }
+  for (const alt of Object.values(sites))
+    languages[alt.hreflang] = absoluteUrl(alt, localPath(alt.lang, id, sub));
+  const xd = sites[X_DEFAULT_SITE as SiteKey];
+  languages["x-default"] = absoluteUrl(xd, localPath(xd.lang, id, sub));
 
   const index = seo.site.isLive && !seo.noindex;
 
@@ -50,7 +45,7 @@ export function buildMetadata(seo: PageSeo): Metadata {
     description: seo.description,
     alternates: {
       canonical,
-      ...(Object.keys(languages).length > 0 ? { languages } : {}),
+      languages,
     },
     openGraph: {
       type: seo.type ?? "website",

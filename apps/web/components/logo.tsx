@@ -62,14 +62,14 @@ export function LogoMark({ className, onDark = false }: { className?: string; on
   );
 }
 
-export function Logo({ tone = "dark", countryCode }: { tone?: "dark" | "light"; countryCode: string }) {
+export function Logo({ tone = "dark", label }: { tone?: "dark" | "light"; label: string }) {
   const word = tone === "dark" ? "text-forest-700" : "text-white";
   const sub = tone === "dark" ? "text-muted" : "text-forest-300";
   return (
     <span className="inline-flex items-center gap-2.5">
       <LogoMark className="h-9 w-auto" onDark={tone === "light"} />
       <span className={`text-[1.3rem] font-semibold tracking-tight ${word}`}>Amerisolar</span>
-      <span className={`self-end pb-1 text-xs font-medium ${sub}`}>{countryCode}</span>
+      <span className={`self-end pb-1 text-xs font-medium ${sub}`}>{label}</span>
     </span>
   );
 }

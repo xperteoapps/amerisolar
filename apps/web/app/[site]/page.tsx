@@ -5,53 +5,41 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buttonClass, Container, FaqAccordion, SpecTable } from "@amerisolar/ui";
-import {
-  formatNumber,
-  isFlexible,
-  kwpPer,
-  percent,
-  piecesPer,
-  powerRange,
-  productsFile,
-  range,
-} from "@amerisolar/content";
+import { isFlexible, kwpPer, piecesPer, powerRange, productsFile } from "@amerisolar/content";
 import { BarList } from "@/components/bars";
 import { CertBadges } from "@/components/cert-badges";
 import { ContainerCalculator, type CalcModel } from "@/components/container-calculator";
-import { CtaBand, InlineCta, rfqHref } from "@/components/cta-band";
+import { CtaBand, InlineCta } from "@/components/cta-band";
 import { EmailQuoteButton, EmailQuoteLink } from "@/components/email-quote";
 import { quoteMailto } from "@/lib/contact";
 import { MediaFigure } from "@/components/media-figure";
 import { DimensionDrawing, ModuleLineup, SegmentLegend } from "@/components/module-drawing";
 import {
   catalog,
-  CATALOG_PATH,
   kwpLabel,
   maxEfficiency,
   pieces,
-  productPath,
   technologyLabel,
   segmentColor,
   segmentOf,
   vocAt,
 } from "@/lib/catalog";
+import { formatter, tpl, type Formatter } from "@/lib/i18n";
 import { media } from "@/lib/media";
 import { datasheetFor } from "@/lib/documents";
-import { RFQ_PATH } from "@/lib/routes";
+import { href, productHref, rfqHref } from "@/lib/routes";
 import { faqLd, JsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
-import { isSiteKey, sites } from "@/lib/sites";
+import { isSiteKey, sites, type Site } from "@/lib/sites";
+import { messagesFor } from "@/messages";
+import type { HomeV } from "@/messages/pl";
 
 export async function generateMetadata({ params }: PageProps<"/[site]">) {
   const { site: key } = await params;
   if (!isSiteKey(key)) return {};
-  return buildMetadata({
-    site: sites[key],
-    path: "/",
-    title: "Panele fotowoltaiczne hurt od producenta — Amerisolar",
-    description:
-      "Moduły fotowoltaiczne Amerisolar w ilościach kontenerowych prosto od producenta: TOPCon 430–720 W, bifacjalne, double glass, elastyczne. Zapytaj o cenę.",
-  });
+  const site = sites[key];
+  const t = messagesFor(site).home;
+  return buildMetadata({ site, route: { id: "home" }, title: t.metaTitle, description: t.metaDescription });
 }
 
 // ---------- dane do sekcji (wyłącznie z products.json) ----------
@@ -85,26 +73,52 @@ const facts = productsFile.company_facts as {
   europe_2025_references_mw: Record<string, number>;
 };
 
-const massCompare = ["as-7m144nfl-hc-black", "as-7m132fl-hc", "as-7m144n-hc", "as-8m132n-bhc"].map((s) => {
-  const p = by(s);
-  return {
-    key: p.slug,
-    label: p.model,
-    value: p.areal_mass_kg_m2,
-    display: `${formatNumber(p.areal_mass_kg_m2)} kg/m²`,
-    tone: isFlexible(p) ? ("flex" as const) : ("muted" as const),
-  };
-});
+/** Kraje z katalogu (nazwy PL w products.json) → ISO, do nazw w języku serwisu. */
+const ISO: Record<string, string> = {
+  Polska: "PL",
+  Dania: "DK",
+  Węgry: "HU",
+  Niemcy: "DE",
+  Hiszpania: "ES",
+  Włochy: "IT",
+  Francja: "FR",
+  Holandia: "NL",
+  Belgia: "BE",
+  Norwegia: "NO",
+};
+const europeMw: { code: string; mw: number }[] = Object.entries({
+  Polska: facts.poland_2025_references_mw,
+  ...facts.europe_2025_references_mw,
+})
+  .map(([name, mw]) => ({ code: ISO[name] ?? name, mw }))
+  .sort((a, b) => b.mw - a.mw);
+const europeTotal = europeMw.reduce((s, x) => s + x.mw, 0);
 
-const europe = Object.entries({ Polska: facts.poland_2025_references_mw, ...facts.europe_2025_references_mw })
-  .sort((a, b) => b[1] - a[1])
-  .map(([country, mw]) => ({
-    key: country,
-    label: country,
+/** Referencje rynku serwisu: MW dla kraju z katalogu, w innym przypadku suma Europy. */
+const marketMw = (site: Site) => europeMw.find((x) => x.code === site.countryCode)?.mw ?? europeTotal;
+
+function massCompare(f: Formatter) {
+  return ["as-7m144nfl-hc-black", "as-7m132fl-hc", "as-7m144n-hc", "as-8m132n-bhc"].map((s) => {
+    const p = by(s);
+    return {
+      key: p.slug,
+      label: p.model,
+      value: p.areal_mass_kg_m2,
+      display: `${f.num(p.areal_mass_kg_m2)} kg/m²`,
+      tone: isFlexible(p) ? ("flex" as const) : ("muted" as const),
+    };
+  });
+}
+
+function europeBars(site: Site, f: Formatter) {
+  return europeMw.map(({ code, mw }) => ({
+    key: code,
+    label: f.country(code),
     value: mw,
     display: `${mw} MW`,
-    tone: country === "Polska" ? ("base" as const) : ("muted" as const),
+    tone: code === (site.countryCode ?? "PL") ? ("base" as const) : ("muted" as const),
   }));
+}
 
 // Przykład doboru stringu (wyliczenie poglądowe, wzór z MASTER_PROMPT Faza 2).
 const strIdx = industrial.power_bins_w.indexOf(powerRange(industrial).max);
@@ -126,72 +140,82 @@ const calcModels: CalcModel[] = catalog.map((p) => {
   };
 });
 
-const homeFaq = [
-  {
-    question: "Czy moduły Amerisolar kupię bezpośrednio od producenta?",
-    answer:
-      "Tak. Dostawy realizujemy w ilościach kontenerowych bezpośrednio od producenta — Worldwide Energy and Manufacturing USA Co., Ltd., właściciela marki Amerisolar. Cenę i warunki dostawy podajemy w ofercie.",
-  },
-  {
-    question: "Ile kWp mieści kontener 40'HQ?",
-    answer: `Zależnie od modelu od ${formatNumber(kwpMin)} do ${formatNumber(kwpMax)} kWp (wyliczenie: liczba modułów w kontenerze wg karty katalogowej × najwyższa klasa mocy). Na przykład ${farm.model}: ${pieces(farm, "40ft_hq")} sztuk, ${kwpLabel(farm, "40ft_hq")} kWp.`,
-  },
-  {
-    question: "Czym różni się TOPCon od PERC?",
-    answer: `TOPCon to ogniwa typu N z pasywowanym kontaktem tylnym. W naszej ofercie przekłada się to m.in. na niższy współczynnik temperaturowy mocy: ${formatNumber(industrial.temp_coeff.pmax_pct_per_c)}%/°C w modułach TOPCon wobec ${formatNumber(perc.temp_coeff.pmax_pct_per_c)}%/°C w module PERC ${perc.model} — w upale moduł TOPCon traci mniej mocy.`,
-  },
-  {
-    question: "Czy warto kupić moduły bifacjalne?",
-    answer: `Na farmach, carportach i dachach płaskich z jasnym podłożem — zwykle tak. Karta ${farm.model} podaje przykład: moduł ${farm.bifacial_gain_example!.base_w} W przy 20% zysku z tyłu daje ${farm.bifacial_gain_example!.gain_pct_to_pmax_w["20"]} W. Rzeczywisty zysk zależy od albedo podłoża i wysokości montażu.`,
-  },
-  {
-    question: "Jakie gwarancje mają moduły?",
-    answer: `Moduły szklane: ${glass[0]!.warranty_years.product} lat gwarancji produktowej i ${glass[0]!.warranty_years.linear_power} lat liniowej gwarancji mocy. Linia elastyczna: ${flexHeadline.warranty_years.product} i ${flexHeadline.warranty_years.linear_power} lat.`,
-  },
-  {
-    question: "Jakie certyfikaty mają moduły?",
-    answer: `Moduły w ofercie mają certyfikaty TÜV SÜD lub TÜV Rheinland według IEC 61215 i IEC 61730 oraz atesty CE — każdy z określonym zakresem mocy, który podajemy na stronie z kartami katalogowymi. Fabryka ma certyfikaty ISO 9001, ISO 14001 i ISO 45001. Wszystkie dokumenty pobierzesz bez rejestracji.`,
-  },
-  {
-    question: "Co zrobić, gdy dach nie uniesie klasycznych paneli?",
-    answer: `Rozważ linię elastyczną: ok. 3 kg/m², ${flexHeadline.dimensions_mm[2]} mm grubości, montaż przez klejenie bez przewiertów. Dobór na konkretny obiekt wymaga oceny konstruktora — prześlij nam opis dachu w zapytaniu.`,
-  },
-  {
-    question: "Czy macie magazyn w Polsce?",
-    answer:
-      "Nie. Moduły zamawiasz w ilościach kontenerowych bezpośrednio od producenta — dzięki temu cena dotyczy całej partii, bez kosztów magazynu pośredniego. Warunki i miejsce dostawy ustalamy w ofercie.",
-  },
-  {
-    question: "Jakie jest minimalne zamówienie?",
-    answer:
-      "Sprzedajemy w ilościach kontenerowych. Ile modułów i kWp mieści kontener 20' i 40'HQ dla każdego modelu, pokazuje tabela powyżej; dokładne minimum dla wybranego modelu podajemy w ofercie.",
-  },
-  {
-    question: "Komu sprzedajecie moduły?",
-    answer:
-      "Firmom kupującym w ilościach kontenerowych: hurtowniom i dystrybutorom OZE, traderom i importerom oraz firmom montażowym i EPC realizującym duże wolumeny.",
-  },
-  {
-    question: "Jaka jest cena paneli?",
-    answer:
-      "Cena na zapytanie. Zależy od modelu i klasy mocy, liczby kontenerów, miejsca dostawy i terminu. Wyślij zapytanie — odpowiemy konkretną ofertą.",
-  },
-];
+function homeVars(site: Site, f: Formatter): HomeV {
+  const g = farm.bifacial_gain_example!;
+  return {
+    pMin: String(pMin),
+    pMax: String(pMax),
+    flexMm: String(flexHeadline.dimensions_mm[2]),
+    hqPcsMin: f.num(Math.min(...hqPcs), 0),
+    hqPcsMax: f.num(Math.max(...hqPcs), 0),
+    glassWP: String(glass[0]!.warranty_years.product),
+    glassWL: String(glass[0]!.warranty_years.linear_power),
+    flexWP: String(flexHeadline.warranty_years.product),
+    flexWL: String(flexHeadline.warranty_years.linear_power),
+    marketMw: String(marketMw(site)),
+    effMax: f.pct(effMax),
+    smallModel: by("as-7m108n-bhc").model,
+    farmModel: farm.model,
+    farmMaxW: String(powerRange(farm).max),
+    roofRange: f.range(roofMin, roofMax, "W"),
+    largeRange: f.range(powerRange(industrial).min, powerRange(farm).max, "W"),
+    palletMin: String(Math.min(...palletPcs)),
+    palletMax: String(Math.max(...palletPcs)),
+    kwpMin: f.num(kwpMin),
+    kwpMax: f.num(kwpMax),
+    farmKwp: kwpLabel(farm, "40ft_hq", f),
+    farmPieces: pieces(farm, "40ft_hq"),
+    topconCoeff: f.num(industrial.temp_coeff.pmax_pct_per_c),
+    percModel: perc.model,
+    percCoeff: f.num(perc.temp_coeff.pmax_pct_per_c),
+    heatDiff: f.num((perc.temp_coeff.pmax_pct_per_c - industrial.temp_coeff.pmax_pct_per_c) * -40, 1),
+    farmGlass: messagesFor(site).productCopy.bySlug[farm.slug]?.glass ?? farm.glass ?? "",
+    bifBase: String(g.base_w),
+    bifGain20: String(g.gain_pct_to_pmax_w["20"]),
+    farm1MwContainers: String(Math.ceil(1000 / kwpPer(farm, "40ft_hq", powerRange(farm).max).max)),
+    farm1MwModules: f.num(Math.ceil(1_000_000 / powerRange(farm).max), 0),
+    industrialModel: industrial.model,
+    industrialMaxW: String(powerRange(industrial).max),
+    vocStc: new Intl.NumberFormat(site.locale, { minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(
+      strVoc,
+    ),
+    betaVoc: f.num(industrial.temp_coeff.voc_pct_per_c),
+    vocCold: f.num(strVocCold, 1),
+    str1500: String(str1500),
+    str1000: String(str1000),
+    bendRadius: f.num(flexHeadline.bending_radius_m!),
+    flexEff: f.pct(maxEfficiency(flexHeadline)),
+    snowPa: f.num(glass[0]!.mechanical_load_pa!.snow, 0),
+    windPa: f.num(glass[0]!.mechanical_load_pa!.wind, 0),
+    opTemp: tpl(messagesFor(site).productCopy.opTemp, {
+      min: glass[0]!.operating_temp_c.split(" ")[0]!.replace("-", "−"),
+      max: glass[0]!.operating_temp_c.split(" ").at(-1)!,
+    }),
+    certValidUntil: "",
+  };
+}
 
 export default async function HomePage({ params }: PageProps<"/[site]">) {
   const { site: key } = await params;
   if (!isSiteKey(key)) notFound();
   const site = sites[key];
+  const m = messagesFor(site);
+  const t = m.home;
+  const f = formatter(site.locale);
+  const v = homeVars(site, f);
+  const faq = t.faq(v);
+  const segColors = ["var(--color-ink)", segmentColor.large, segmentColor.roof];
+  const segModels = [undefined, undefined, farm.model];
 
   return (
     <>
-      <JsonLd data={faqLd(homeFaq)} />
+      <JsonLd data={faqLd(faq)} />
 
       {/* 1. HERO */}
       <section className="relative isolate overflow-hidden bg-forest-950 text-white">
         <Image
           src={media.farm.src}
-          alt={media.farm.alt}
+          alt={m.media.farm}
           fill
           priority
           sizes="100vw"
@@ -199,72 +223,55 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-forest-950 via-forest-950/60 to-forest-950/10" />
         <Container className="flex min-h-[82svh] flex-col justify-end pt-32 pb-12">
-          <p className="max-w-xl text-lg font-medium text-sun">
-            Ilości kontenerowe, bezpośrednio od producenta
-          </p>
+          <p className="max-w-xl text-lg font-medium text-sun">{t.eyebrow}</p>
           <h1 className="font-wide mt-4 max-w-5xl text-[2.5rem] leading-[1.02] font-bold text-balance sm:text-6xl lg:text-[4.6rem]">
-            Panele fotowoltaiczne Amerisolar w hurcie — kontenery od producenta
+            {t.h1}
           </h1>
           <div className="mt-8 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <p className="max-w-xl text-lg leading-relaxed text-white/85">
-              Moduły TOPCon N-type od {pMin} do {pMax} W, bifacjalne, double glass i linia elastyczna{" "}
-              {flexHeadline.dimensions_mm[2]} mm. Dla hurtowni, traderów i firm montażowych kupujących w
-              ilościach kontenerowych.
-            </p>
+            <p className="max-w-xl text-lg leading-relaxed text-white/85">{t.lead(v)}</p>
             <div className="flex flex-wrap gap-3">
-              <Link href={RFQ_PATH} className={buttonClass("primary", "px-6 py-3.5 text-base")}>
-                Zapytaj o cenę kontenerową
+              <Link href={href(site, "rfq")} className={buttonClass("primary", "px-6 py-3.5 text-base")}>
+                {m.common.askContainerPrice}
               </Link>
-              <Link href={CATALOG_PATH} className={buttonClass("onDark", "px-6 py-3.5 text-base")}>
-                Zobacz moduły
+              <Link href={href(site, "catalog")} className={buttonClass("onDark", "px-6 py-3.5 text-base")}>
+                {m.common.seeModules}
               </Link>
-              <EmailQuoteLink email={site.company.email} tone="dark" className="basis-full" />
+              <EmailQuoteLink site={site} tone="dark" className="basis-full" />
             </div>
           </div>
           <ul className="mt-12 grid gap-4 border-t border-white/15 pt-6 text-sm text-white/80 sm:grid-cols-2 lg:grid-cols-4">
-            <li>Dostawy bezpośrednio od producenta</li>
-            <li>
-              Kontener 40&apos;HQ: {formatNumber(Math.min(...hqPcs), "pl-PL", 0)}–
-              {formatNumber(Math.max(...hqPcs), "pl-PL", 0)} modułów
-            </li>
-            <li>Karta katalogowa i certyfikaty dla każdego modelu</li>
-            <li>Gwarancja do {glass[0]!.warranty_years.linear_power} lat na moc</li>
+            {t.bullets(v).map((x) => (
+              <li key={x}>{x}</li>
+            ))}
           </ul>
-          <p className="mt-6 text-xs text-white/50">{media.farm.caption}</p>
+          <p className="mt-6 text-xs text-white/50">{m.common.aiCaption}</p>
         </Container>
       </section>
 
       {/* 2. LICZBY PRODUCENTA */}
       <section className="border-b border-line">
         <Container className="grid grid-cols-2 gap-x-6 gap-y-10 py-14 md:grid-cols-4">
-          <Fact value="od 1993" label="na rynku — według katalogu producenta, Kalifornia" />
-          <Fact value="ok. 11 GW" label="mocy produkcyjnej według producenta (2025)" />
-          <Fact
-            value={`${facts.poland_2025_references_mw} MW`}
-            label="modułów dostarczonych do Polski w 2025 r. (wg katalogu)"
-          />
-          <Fact value={percent(effMax)} label="maksymalna sprawność modułu w ofercie" />
+          {t.facts(v).map((x) => (
+            <Fact key={x.label} value={x.value} label={x.label} />
+          ))}
         </Container>
       </section>
 
       {/* 2b. CERTYFIKATY */}
-      <CertBadges />
+      <CertBadges site={site} />
 
       {/* 3. OFERTA W JEDNEJ SKALI */}
       <section className="bg-forest-950 text-white">
         <Container className="py-20">
           <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
-            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">Siedem modułów, jedna skala</h2>
-            <p className="max-w-lg text-forest-300">
-              Schematy narysowane z wymiarów i liczby ogniw z kart katalogowych — od kompaktowego{" "}
-              {by("as-7m108n-bhc").model} na dachy domów po {farm.model} na farmy fotowoltaiczne.
-            </p>
+            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">{t.lineupTitle}</h2>
+            <p className="max-w-lg text-forest-300">{t.lineupText(v)}</p>
           </div>
-          <ModuleLineup items={catalog} className="mt-14 h-auto w-full" />
+          <ModuleLineup site={site} items={catalog} className="mt-14 h-auto w-full" />
           <div className="mt-8 flex flex-wrap items-center justify-between gap-6">
-            <SegmentLegend />
-            <Link href={CATALOG_PATH} className={buttonClass("onDark")}>
-              Porównaj wszystkie modele
+            <SegmentLegend site={site} />
+            <Link href={href(site, "catalog")} className={buttonClass("onDark")}>
+              {t.lineupCta}
             </Link>
           </div>
         </Container>
@@ -274,33 +281,16 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       <section className="py-20 sm:py-28">
         <Container className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
-            <h2 className="font-wide text-3xl font-semibold text-balance sm:text-4xl">
-              Hurtowe ilości paneli prosto od producenta
-            </h2>
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">
-              Zamówienie kontenerowe trafia bezpośrednio do producenta modułów Amerisolar. Krótszy łańcuch
-              dostaw to cena liczona dla całej partii i dokumentacja prosto od producenta.
-            </p>
-            <InlineCta site={site} text="Masz projekt na kilkaset kWp lub więcej?" />
+            <h2 className="font-wide text-3xl font-semibold text-balance sm:text-4xl">{t.directTitle}</h2>
+            <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">{t.directText}</p>
+            <InlineCta site={site} text={t.directCta} />
           </div>
           <dl className="grid gap-x-10 gap-y-10 sm:grid-cols-2">
-            <Point title="Cena kontenerowa">
-              Wyceniamy całą partię — kontener 20&apos; albo 40&apos;HQ — dla wybranej klasy mocy, zamiast
-              ceny za pojedyncze palety.
-            </Point>
-            <Point title="Pełna dokumentacja">
-              Karty katalogowe z tabelami STC i NOCT, współczynnikami temperaturowymi i obciążeniami
-              mechanicznymi oraz certyfikaty dla każdego modelu.
-            </Point>
-            <Point title="Jedna linia, wszystkie segmenty">
-              Moduły {range(roofMin, roofMax, "W")} na dachy,{" "}
-              {range(powerRange(industrial).min, powerRange(farm).max, "W")} na dachy przemysłowe i farmy oraz
-              linia elastyczna do dachów specjalnych.
-            </Point>
-            <Point title="Gwarancja producenta">
-              {glass[0]!.warranty_years.product} lat na produkt i {glass[0]!.warranty_years.linear_power} lat
-              liniowej gwarancji mocy w modułach szklanych.
-            </Point>
+            {t.points(v).map((x) => (
+              <Point key={x.title} title={x.title}>
+                {x.text}
+              </Point>
+            ))}
           </dl>
         </Container>
       </section>
@@ -308,49 +298,23 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       {/* 5. DLA KOGO */}
       <section className="border-t border-line bg-paper py-20 sm:py-28">
         <Container>
-          <h2 className="font-wide max-w-3xl text-3xl font-semibold sm:text-4xl">
-            Dla hurtowni, traderów i firm montażowych kupujących w dużych ilościach
-          </h2>
+          <h2 className="font-wide max-w-3xl text-3xl font-semibold sm:text-4xl">{t.segmentsTitle}</h2>
           <div className="mt-14 grid gap-8 md:grid-cols-3">
-            <Segment
-              color="var(--color-ink)"
-              title="Hurtownie i dystrybutorzy OZE"
-              value={`${formatNumber(Math.min(...hqPcs), "pl-PL", 0)}–${formatNumber(Math.max(...hqPcs), "pl-PL", 0)}`}
-              valueLabel="modułów w kontenerze 40'HQ, zależnie od modelu"
-              href={rfqHref()}
-              cta="Zapytaj o warunki hurtowe"
-              email={site.company.email}
-            >
-              Pełna linia w jednym źródle — od modułów dachowych po farmowe i elastyczne. Karty katalogowe i
-              certyfikaty do dalszej sprzedaży, moduły pakowane na paletach po {Math.min(...palletPcs)}–
-              {Math.max(...palletPcs)} sztuk.
-            </Segment>
-            <Segment
-              color={segmentColor.large}
-              title="Traderzy i importerzy"
-              value={`${formatNumber(kwpMin)}–${formatNumber(kwpMax)} kWp`}
-              valueLabel="w jednym kontenerze 40'HQ, zależnie od modelu (wyliczenie)"
-              href={rfqHref()}
-              cta="Zapytaj o dostawy wielokontenerowe"
-              email={site.company.email}
-            >
-              Zakup kontenerowy bezpośrednio od producenta, bez pośredniczącej hurtowni. Specyfikację, klasy
-              mocy i warunki dostawy ustalamy dla całej partii.
-            </Segment>
-            <Segment
-              color={segmentColor.roof}
-              title="Firmy montażowe i EPC"
-              value={`${kwpLabel(farm, "40ft_hq")} kWp`}
-              valueLabel={`w kontenerze modułów ${farm.model} ${powerRange(farm).max} W (wyliczenie)`}
-              href={rfqHref(farm.model)}
-              cta="Zapytaj o dostawę na projekt"
-              email={site.company.email}
-              model={farm.model}
-            >
-              Moduły {range(roofMin, roofMax, "W")} na dachy firm i carporty oraz{" "}
-              {range(powerRange(industrial).min, powerRange(farm).max, "W")} na dachy przemysłowe i farmy
-              fotowoltaiczne. Kontener to zapas jednego typu modułu na wiele realizacji.
-            </Segment>
+            {t.segments(v).map((x, i) => (
+              <Segment
+                key={x.title}
+                color={segColors[i]!}
+                title={x.title}
+                value={x.value}
+                valueLabel={x.valueLabel}
+                href={rfqHref(site, segModels[i])}
+                cta={x.cta}
+                site={site}
+                model={segModels[i]}
+              >
+                {x.text}
+              </Segment>
+            ))}
           </div>
         </Container>
       </section>
@@ -359,35 +323,33 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       <section className="py-20 sm:py-28">
         <Container>
           <div className="flex flex-wrap items-end justify-between gap-6">
-            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">Moduły fotowoltaiczne w ofercie</h2>
-            <p className="max-w-sm text-muted">
-              Sprawność do {percent(effMax)}. Parametry STC z kart katalogowych.
-            </p>
+            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">{t.modelsTitle}</h2>
+            <p className="max-w-sm text-muted">{t.modelsText(v)}</p>
           </div>
           <div className="mt-10 overflow-x-auto">
             <table className="nums w-full min-w-[52rem] border-collapse text-left">
               <thead>
                 <tr className="border-y border-ink/80 text-sm text-muted">
                   <th scope="col" className="py-3 pr-4 font-medium">
-                    Model
+                    {t.table.model}
                   </th>
                   <th scope="col" className="px-4 py-3 font-medium">
-                    Technologia
+                    {t.table.technology}
                   </th>
                   <th scope="col" className="px-4 py-3 text-right font-medium">
-                    Moc
+                    {t.table.power}
                   </th>
                   <th scope="col" className="px-4 py-3 text-right font-medium">
-                    Sprawność maks.
+                    {t.table.effMax}
                   </th>
                   <th scope="col" className="px-4 py-3 text-right font-medium">
-                    Masa
+                    {t.table.mass}
                   </th>
                   <th scope="col" className="px-4 py-3 text-right font-medium">
-                    Gwarancja
+                    {t.table.warranty}
                   </th>
                   <th scope="col" className="py-3 pl-4 text-right font-medium">
-                    <span className="sr-only">Karta katalogowa i zapytanie</span>
+                    <span className="sr-only">{t.table.actions}</span>
                   </th>
                 </tr>
               </thead>
@@ -402,21 +364,21 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
                           style={{ background: segmentColor[segmentOf(p)] }}
                         />
                         <Link
-                          href={productPath(p)}
+                          href={productHref(site, p.slug)}
                           className="text-forest-700 underline-offset-4 group-hover:underline"
                         >
                           {p.model}
                         </Link>
                       </span>
                     </th>
-                    <td className="px-4 py-4 text-muted">{technologyLabel(p)}</td>
+                    <td className="px-4 py-4 text-muted">{technologyLabel(p, m)}</td>
                     <td className="px-4 py-4 text-right">
-                      {range(powerRange(p).min, powerRange(p).max, "W")}
+                      {f.range(powerRange(p).min, powerRange(p).max, "W")}
                     </td>
-                    <td className="px-4 py-4 text-right">{percent(maxEfficiency(p))}</td>
-                    <td className="px-4 py-4 text-right">{formatNumber(p.weight_kg)}&nbsp;kg</td>
+                    <td className="px-4 py-4 text-right">{f.pct(maxEfficiency(p))}</td>
+                    <td className="px-4 py-4 text-right">{f.unit(p.weight_kg, "kg")}</td>
                     <td className="px-4 py-4 text-right">
-                      {p.warranty_years.product}/{p.warranty_years.linear_power} lat
+                      {tpl(m.common.years, { p: p.warranty_years.product, l: p.warranty_years.linear_power })}
                     </td>
                     <td className="py-4 pl-4 text-right">
                       <span className="flex justify-end gap-5 whitespace-nowrap">
@@ -426,21 +388,23 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
                             download
                             className="text-sm font-semibold text-forest-700 hover:underline"
                           >
-                            Karta PDF<span className="sr-only"> {p.model}</span>
+                            {m.common.datasheetPdf}
+                            <span className="sr-only"> {p.model}</span>
                           </a>
                         ) : null}
                         <Link
-                          href={rfqHref(p.model)}
+                          href={rfqHref(site, p.model)}
                           className="text-sm font-semibold text-sun-deep hover:underline"
                         >
-                          Zapytaj o cenę
+                          {m.common.askPrice}
                         </Link>
                         {site.company.email ? (
                           <a
-                            href={quoteMailto(site.company.email, { model: p.model })}
+                            href={quoteMailto(site.company.email, m.email, { model: p.model })}
                             className="text-sm font-semibold text-forest-700 hover:underline"
                           >
-                            E-mail<span className="sr-only"> w sprawie {p.model}</span>
+                            {m.email.tableLink}
+                            <span className="sr-only"> {tpl(m.email.tableSr, { model: p.model })}</span>
                           </a>
                         ) : null}
                       </span>
@@ -450,63 +414,35 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
               </tbody>
             </table>
           </div>
-          <SegmentLegend tone="light" className="mt-6" />
+          <SegmentLegend site={site} tone="light" className="mt-6" />
         </Container>
       </section>
 
       {/* 7. TECHNOLOGIA */}
       <section className="border-t border-line bg-paper py-20 sm:py-28">
         <Container>
-          <h2 className="font-wide max-w-3xl text-3xl font-semibold sm:text-4xl">
-            TOPCon N-type, bifacjalność, double glass — co to daje w praktyce
-          </h2>
+          <h2 className="font-wide max-w-3xl text-3xl font-semibold sm:text-4xl">{t.techTitle}</h2>
           <div className="mt-14 grid gap-14 lg:grid-cols-3">
-            <article>
-              <h3 className="text-xl font-semibold">Mniejsze straty w upale</h3>
-              <p className="mt-4 leading-relaxed text-muted">
-                Moduły TOPCon w ofercie mają współczynnik temperaturowy mocy{" "}
-                {formatNumber(industrial.temp_coeff.pmax_pct_per_c)}
-                %/°C. Dla porównania moduł PERC {perc.model}: {formatNumber(perc.temp_coeff.pmax_pct_per_c)}
-                %/°C. Przy ogniwie nagrzanym do 65 °C (40 °C powyżej STC) to różnica ok.{" "}
-                {formatNumber(
-                  (perc.temp_coeff.pmax_pct_per_c - industrial.temp_coeff.pmax_pct_per_c) * -40,
-                  "pl-PL",
-                  1,
-                )}{" "}
-                punktu procentowego mocy (wyliczenie).
-              </p>
-            </article>
-            <article>
-              <h3 className="text-xl font-semibold">Ogniwa połówkowe</h3>
-              <p className="mt-4 leading-relaxed text-muted">
-                Wszystkie moduły szklane w ofercie mają ogniwa cięte na pół (half-cell). Mniejszy prąd w
-                każdej połówce oznacza mniejsze straty rezystancyjne i mniejszy wpływ częściowego zacienienia
-                na cały moduł.
-              </p>
-            </article>
-            <article>
-              <h3 className="text-xl font-semibold">Moc z obu stron</h3>
-              <p className="mt-4 leading-relaxed text-muted">
-                Moduły bifacjalne zbierają też światło odbite od podłoża. {farm.model} ma dodatkowo
-                konstrukcję double glass — szkło z obu stron zamiast folii: {farm.glass}.
-              </p>
-            </article>
+            {t.tech(v).map((x) => (
+              <article key={x.title}>
+                <h3 className="text-xl font-semibold">{x.title}</h3>
+                <p className="mt-4 leading-relaxed text-muted">{x.text}</p>
+              </article>
+            ))}
           </div>
           <SpecTable
             className="mt-14"
-            caption={`Zysk z tyłu modułu bifacjalnego — przykład z karty ${farm.model} (${farm.bifacial_gain_example!.base_w} W)`}
-            rowHeaderLabel="Zysk z tyłu"
+            caption={t.bifCaption(v)}
+            rowHeaderLabel={t.bifRowHeader}
             columns={Object.keys(farm.bifacial_gain_example!.gain_pct_to_pmax_w).map((k) => `+${k}%`)}
             rows={[
               {
-                label: "Moc łączna",
+                label: t.bifRow,
                 unit: "W",
-                values: Object.values(farm.bifacial_gain_example!.gain_pct_to_pmax_w).map((v) =>
-                  formatNumber(v, "pl-PL", 0),
-                ),
+                values: Object.values(farm.bifacial_gain_example!.gain_pct_to_pmax_w).map((x) => f.num(x, 0)),
               },
             ]}
-            note="Rzeczywisty zysk zależy od albedo podłoża (trawa, żwir, membrana dachowa), wysokości montażu i rozstawu rzędów."
+            note={t.bifNote}
           />
         </Container>
       </section>
@@ -515,30 +451,27 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       <section className="py-20 sm:py-28">
         <Container>
           <div className="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
-            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">Ile modułów i kWp w kontenerze</h2>
-            <p className="max-w-lg text-muted">
-              Sztuki według kart katalogowych. kWp to wyliczenie dla najwyższej klasy mocy — w ofercie liczymy
-              na klasie, którą wybierzesz.
-            </p>
+            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">{t.logisticsTitle}</h2>
+            <p className="max-w-lg text-muted">{t.logisticsText}</p>
           </div>
           <div className="mt-12 overflow-x-auto">
             <table className="nums w-full min-w-[46rem] border-collapse text-left">
               <thead>
                 <tr className="border-y border-ink/80 text-sm text-muted">
                   <th scope="col" className="py-3 pr-4 font-medium">
-                    Model
+                    {t.table.model}
                   </th>
                   <th scope="col" className="px-4 py-3 text-right font-medium">
-                    Paleta
+                    {t.logisticsTable.pallet}
                   </th>
                   <th scope="col" className="px-4 py-3 text-right font-medium">
-                    Kontener 20&apos;
+                    {t.logisticsTable.c20}
                   </th>
                   <th scope="col" className="px-4 py-3 text-right font-medium">
-                    Kontener 40&apos;HQ
+                    {t.logisticsTable.c40}
                   </th>
                   <th scope="col" className="py-3 pl-4 text-right font-medium">
-                    kWp w 40&apos;HQ
+                    {t.logisticsTable.kwp40}
                   </th>
                 </tr>
               </thead>
@@ -546,14 +479,20 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
                 {catalog.map((p) => (
                   <tr key={p.slug} className="border-b border-line">
                     <th scope="row" className="py-3.5 pr-4 font-semibold">
-                      <Link href={productPath(p)} className="text-forest-700 hover:underline">
+                      <Link href={productHref(site, p.slug)} className="text-forest-700 hover:underline">
                         {p.model}
                       </Link>
                     </th>
-                    <td className="px-4 py-3.5 text-right">{pieces(p, "pallet")} szt.</td>
-                    <td className="px-4 py-3.5 text-right">{pieces(p, "20ft")} szt.</td>
-                    <td className="px-4 py-3.5 text-right">{pieces(p, "40ft_hq")} szt.</td>
-                    <td className="py-3.5 pl-4 text-right font-semibold">{kwpLabel(p, "40ft_hq")}</td>
+                    <td className="px-4 py-3.5 text-right">
+                      {pieces(p, "pallet")} {m.common.pieces}
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      {pieces(p, "20ft")} {m.common.pieces}
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      {pieces(p, "40ft_hq")} {m.common.pieces}
+                    </td>
+                    <td className="py-3.5 pl-4 text-right font-semibold">{kwpLabel(p, "40ft_hq", f)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -565,31 +504,17 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
                 key: p.slug,
                 label: p.model,
                 value: k.max,
-                display:
-                  k.min === k.max
-                    ? `${formatNumber(k.max)} kWp`
-                    : `${formatNumber(k.min)}–${formatNumber(k.max)} kWp`,
+                display: k.min === k.max ? `${f.num(k.max)} kWp` : `${f.num(k.min)}–${f.num(k.max)} kWp`,
                 tone: isFlexible(p) ? ("flex" as const) : ("base" as const),
               }))}
             />
             <div className="rounded-(--radius-md) bg-forest-950 p-8 text-white">
-              <h3 className="font-wide text-xl font-semibold">Farma 1 MWp — ile kontenerów?</h3>
-              <p className="mt-4 text-forest-100">
-                Z modułami {farm.model} {powerRange(farm).max} W:{" "}
-                <strong className="text-white">
-                  {Math.ceil(1000 / kwpPer(farm, "40ft_hq", powerRange(farm).max).max)} kontenery 40&apos;HQ
-                </strong>{" "}
-                ({formatNumber(Math.ceil(1_000_000 / powerRange(farm).max), "pl-PL", 0)} modułów, wyliczenie).
-              </p>
-              <Link href={rfqHref(farm.model)} className={buttonClass("primary", "mt-6")}>
-                Zapytaj o dostawę na farmę
+              <h3 className="font-wide text-xl font-semibold">{t.farmBoxTitle}</h3>
+              <p className="mt-4 text-forest-100">{t.farmBoxText(v)}</p>
+              <Link href={rfqHref(site, farm.model)} className={buttonClass("primary", "mt-6")}>
+                {t.farmBoxCta}
               </Link>
-              <EmailQuoteLink
-                email={site.company.email}
-                model={farm.model}
-                tone="dark"
-                className="mt-4 flex"
-              />
+              <EmailQuoteLink site={site} model={farm.model} tone="dark" className="mt-4 flex" />
             </div>
           </div>
         </Container>
@@ -599,20 +524,20 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       <section id="kalkulator-kontenerow" className="scroll-mt-20 py-20 sm:py-28">
         <Container>
           <div className="mb-10 grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-end">
-            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">Ile kontenerów potrzebujesz?</h2>
-            <p className="max-w-lg text-muted">
-              Wybierz moduł i klasę mocy, a potem wpisz moc instalacji albo liczbę kontenerów. Wynik
-              przeniesiesz jednym kliknięciem do zapytania o wycenę.
-            </p>
+            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">{t.calcTitle}</h2>
+            <p className="max-w-lg text-muted">{t.calcText}</p>
           </div>
           <ContainerCalculator
             models={calcModels}
-            rfqPath={RFQ_PATH}
+            rfqPath={href(site, "rfq")}
             email={site.company.email}
+            t={m.calc}
+            mail={m.email}
+            locale={site.locale}
             drawings={Object.fromEntries(
               catalog.map((p) => [
                 p.slug,
-                <DimensionDrawing key={p.slug} product={p} className="h-auto w-full" />,
+                <DimensionDrawing key={p.slug} site={site} product={p} className="h-auto w-full" />,
               ]),
             )}
           />
@@ -623,36 +548,18 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       <section className="border-t border-line bg-paper py-20 sm:py-28">
         <Container className="grid gap-14 lg:grid-cols-[1fr_1fr] lg:items-start">
           <div>
-            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">
-              Napięcie Voc zimą i długość stringu
-            </h2>
-            <p className="mt-6 leading-relaxed text-muted">
-              W mroźny, słoneczny dzień napięcie modułu rośnie ponad wartość z karty. Dlatego liczbę modułów w
-              stringu liczy się dla najniższej temperatury ogniwa, zwykle −25 °C w polskich warunkach
-              projektowych.
-            </p>
-            <p className="mt-4 leading-relaxed text-muted">
-              Wzór: Voc(T) = Voc(STC) × (1 + βVoc × (T − 25 °C)).
-            </p>
+            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">{t.stringTitle}</h2>
+            <p className="mt-6 leading-relaxed text-muted">{t.stringText1}</p>
+            <p className="mt-4 leading-relaxed text-muted">{t.stringFormula}</p>
           </div>
           <div className="rounded-(--radius-md) border border-line bg-white p-8">
-            <h3 className="font-semibold">
-              Przykład: {industrial.model} {powerRange(industrial).max} W
-            </h3>
+            <h3 className="font-semibold">{t.stringExample(v)}</h3>
             <dl className="nums mt-6 space-y-3">
-              <Row
-                k="Voc w STC"
-                v={`${formatNumber(strVoc, "pl-PL", 1).includes(",") ? formatNumber(strVoc) : formatNumber(strVoc) + ",0"} V`}
-              />
-              <Row k="βVoc" v={`${formatNumber(industrial.temp_coeff.voc_pct_per_c)}%/°C`} />
-              <Row k="Voc przy −25 °C" v={`${formatNumber(strVocCold, "pl-PL", 1)} V`} strong />
-              <Row k="Maks. modułów w stringu, system 1500 V" v={`${str1500}`} strong />
-              <Row k="Maks. modułów w stringu, system 1000 V" v={`${str1000}`} />
+              {t.stringRows(v).map((r) => (
+                <Row key={r.k} k={r.k} v={r.v} strong={"strong" in r ? r.strong : false} />
+              ))}
             </dl>
-            <p className="mt-6 text-sm text-muted">
-              Wyliczenie poglądowe. O ostatecznej długości stringu decydują też zakres MPPT i maksymalne
-              napięcie wejściowe falownika — sprawdza je projektant instalacji.
-            </p>
+            <p className="mt-6 text-sm text-muted">{t.stringNote}</p>
           </div>
         </Container>
       </section>
@@ -661,78 +568,44 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       <section className="py-20 sm:py-28">
         <Container className="grid gap-14 lg:grid-cols-2 lg:items-start">
           <div>
-            <h2 className="font-wide text-3xl font-semibold text-balance sm:text-4xl">
-              Dach nie uniesie paneli? Konstrukcja pracuje? Jest na to rozwiązanie
-            </h2>
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">
-              Moduły elastyczne Amerisolar klei się bezpośrednio do pokrycia — bez konstrukcji wsporczej i bez
-              przewiertów.
-            </p>
+            <h2 className="font-wide text-3xl font-semibold text-balance sm:text-4xl">{t.flexTitle}</h2>
+            <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">{t.flexText}</p>
             <dl className="mt-10 grid grid-cols-3 gap-6 border-t-2 border-[#7fb3d5] pt-6">
-              <div>
-                <dt className="text-sm text-muted">masa na m²</dt>
-                <dd className="nums font-wide mt-1 text-2xl font-semibold sm:text-3xl">ok. 3 kg</dd>
-              </div>
-              <div>
-                <dt className="text-sm text-muted">grubość</dt>
-                <dd className="nums font-wide mt-1 text-2xl font-semibold sm:text-3xl">
-                  {flexHeadline.dimensions_mm[2]} mm
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm text-muted">przewiertów w dachu</dt>
-                <dd className="nums font-wide mt-1 text-2xl font-semibold sm:text-3xl">0</dd>
-              </div>
+              {t.flexStats(v).map((x) => (
+                <div key={x.k}>
+                  <dt className="text-sm text-muted">{x.k}</dt>
+                  <dd className="nums font-wide mt-1 text-2xl font-semibold sm:text-3xl">{x.v}</dd>
+                </div>
+              ))}
             </dl>
             <ul className="mt-10 space-y-5">
-              <UseRow title="Dachy o niskiej nośności">
-                Hale z blachy trapezowej i płyty warstwowej, obiekty rolnicze, starsze dachy bez rezerwy
-                nośności.
-              </UseRow>
-              <UseRow title="Obiekty z drganiami">
-                Stadiony, hale sportowe, areny, zakłady z maszynami i suwnicami — mała masa, brak szkła i
-                śrub. Dobór po ocenie konstruktora obiektu.
-              </UseRow>
-              <UseRow title="Dachy łukowe">
-                Promień gięcia {formatNumber(flexHeadline.bending_radius_m!)} m — moduł układa się na łuku bez
-                skomplikowanej konstrukcji.
-              </UseRow>
+              {t.flexUses(v).map((x) => (
+                <UseRow key={x.title} title={x.title}>
+                  {x.text}
+                </UseRow>
+              ))}
             </ul>
-            <p className="mt-8 max-w-lg text-sm leading-relaxed text-muted">
-              Uczciwie: sprawność do {percent(maxEfficiency(flexHeadline))} i gwarancja{" "}
-              {flexHeadline.warranty_years.product}/{flexHeadline.warranty_years.linear_power} lat — mniej niż
-              w modułach szklanych. Ten moduł ma sens tam, gdzie alternatywą jest brak instalacji albo
-              wzmocnienie konstrukcji.
-            </p>
+            <p className="mt-8 max-w-lg text-sm leading-relaxed text-muted">{t.flexHonest(v)}</p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href={rfqHref(flexHeadline.model)} className={buttonClass("primary")}>
-                Zamów wstępną ocenę obiektu
+              <Link href={rfqHref(site, flexHeadline.model)} className={buttonClass("primary")}>
+                {t.flexCta}
               </Link>
-              <EmailQuoteButton
-                email={site.company.email}
-                subject="Wstępna ocena obiektu — moduły elastyczne"
-                model={flexHeadline.model}
-              />
+              <EmailQuoteButton site={site} subject={m.email.subjectAssessment} model={flexHeadline.model} />
               {flex.map((p) => (
-                <Link key={p.slug} href={productPath(p)} className={buttonClass("ghost")}>
+                <Link key={p.slug} href={productHref(site, p.slug)} className={buttonClass("ghost")}>
                   {p.model}
                 </Link>
               ))}
             </div>
           </div>
           <div className="space-y-12">
-            <MediaFigure asset={media.lightRoof} />
+            <MediaFigure site={site} asset={media.lightRoof} />
             <figure>
-              <figcaption className="mb-4 text-base font-semibold">
-                Masa samego modułu na m² powierzchni
-              </figcaption>
-              <BarList bars={massCompare} />
-              <p className="mt-4 text-sm text-muted">
-                Dane z kart katalogowych. W systemach szklanych dochodzi masa konstrukcji wsporczej lub
-                balastu — zależna od projektu, dlatego jej tu nie doliczamy.
-              </p>
+              <figcaption className="mb-4 text-base font-semibold">{t.massCaption}</figcaption>
+              <BarList bars={massCompare(f)} />
+              <p className="mt-4 text-sm text-muted">{t.massNote}</p>
             </figure>
-            <MediaFigure asset={media.archedHall} />
+            <MediaFigure site={site} asset={media.archedHall} />
           </div>
         </Container>
       </section>
@@ -740,16 +613,10 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       {/* 11. ZIMA */}
       <section className="border-t border-line bg-paper py-20 sm:py-28">
         <Container className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-          <MediaFigure asset={media.warehouseWinter} />
+          <MediaFigure site={site} asset={media.warehouseWinter} />
           <div>
-            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">Polska zima w karcie katalogowej</h2>
-            <p className="mt-6 leading-relaxed text-muted">
-              Moduły szklane Amerisolar mają w kartach katalogowych obciążenie śniegiem{" "}
-              {formatNumber(glass[0]!.mechanical_load_pa!.snow, "pl-PL", 0)} Pa i wiatrem{" "}
-              {formatNumber(glass[0]!.mechanical_load_pa!.wind, "pl-PL", 0)} Pa oraz zakres temperatur pracy
-              od {glass[0]!.operating_temp_c.replace("-", "−")} °C. Dobór do strefy śniegowej i wiatrowej
-              obiektu potwierdza projektant instalacji.
-            </p>
+            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">{t.winterTitle}</h2>
+            <p className="mt-6 leading-relaxed text-muted">{t.winterText(v)}</p>
           </div>
         </Container>
       </section>
@@ -758,43 +625,27 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       <section className="py-20 sm:py-28">
         <Container className="grid gap-14 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
-            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">Amerisolar w Europie</h2>
-            <p className="mt-6 max-w-md leading-relaxed text-muted">
-              Dostawy modułów w 2025 r. według katalogu producenta. Polska z {facts.poland_2025_references_mw}{" "}
-              MW jest jednym z ważniejszych rynków marki w Europie.
-            </p>
+            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">{t.europeTitle}</h2>
+            <p className="mt-6 max-w-md leading-relaxed text-muted">{t.europeText(v)}</p>
           </div>
-          <BarList bars={europe} />
+          <BarList bars={europeBars(site, f)} />
         </Container>
       </section>
 
       {/* 13. JAK ZAMÓWIĆ — sekwencja */}
       <section className="border-t border-line bg-paper py-20 sm:py-28">
         <Container>
-          <h2 className="font-wide max-w-2xl text-3xl font-semibold sm:text-4xl">
-            Jak zamówić kontener modułów
-          </h2>
+          <h2 className="font-wide max-w-2xl text-3xl font-semibold sm:text-4xl">{t.orderTitle}</h2>
           <ol className="mt-14 grid gap-10 md:grid-cols-4">
-            {[
-              [
-                "Zapytanie",
-                "Model, ilość w kWp lub kontenerach, miejsce dostawy i termin — przez formularz.",
-              ],
-              [
-                "Oferta",
-                "Cena dla wybranej klasy mocy, warunki dostawy oraz karty katalogowe i certyfikaty.",
-              ],
-              ["Zamówienie", "Potwierdzenie specyfikacji, terminu i warunków płatności."],
-              ["Dostawa", "Kontener z modułami w uzgodnionym miejscu i terminie."],
-            ].map(([t, d], i) => (
-              <li key={t} className="border-t-2 border-leaf pt-5">
+            {t.orderSteps.map(({ t: title, d }, i) => (
+              <li key={title} className="border-t-2 border-leaf pt-5">
                 <span className="nums font-wide text-4xl font-semibold text-forest-700">{i + 1}</span>
-                <h3 className="mt-3 text-lg font-semibold">{t}</h3>
+                <h3 className="mt-3 text-lg font-semibold">{title}</h3>
                 <p className="mt-2 leading-relaxed text-muted">{d}</p>
               </li>
             ))}
           </ol>
-          <InlineCta site={site} text="Zacznij od zapytania — to zajmuje kilka minut." />
+          <InlineCta site={site} text={t.orderCta} />
         </Container>
       </section>
 
@@ -802,37 +653,18 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       <section className="py-20 sm:py-28">
         <Container>
           <div className="flex flex-wrap items-end justify-between gap-6">
-            <h2 className="font-wide max-w-2xl text-3xl font-semibold sm:text-4xl">
-              Gwarancje, normy i producent
-            </h2>
-            <Link href="/certyfikaty-i-dokumenty/" className={buttonClass("ghost")}>
-              Karty katalogowe i certyfikaty do pobrania
+            <h2 className="font-wide max-w-2xl text-3xl font-semibold sm:text-4xl">{t.trustTitle}</h2>
+            <Link href={href(site, "docs")} className={buttonClass("ghost")}>
+              {t.trustCta}
             </Link>
           </div>
           <div className="mt-12 grid gap-12 md:grid-cols-3">
-            <div className="border-t border-ink/80 pt-6">
-              <h3 className="font-semibold">Gwarancje</h3>
-              <p className="mt-3 leading-relaxed text-muted">
-                Moduły szklane: {glass[0]!.warranty_years.product} lat na produkt i{" "}
-                {glass[0]!.warranty_years.linear_power} lat liniowej gwarancji mocy. Linia elastyczna:{" "}
-                {flexHeadline.warranty_years.product} i {flexHeadline.warranty_years.linear_power} lat.
-              </p>
-            </div>
-            <div className="border-t border-ink/80 pt-6">
-              <h3 className="font-semibold">Normy i certyfikaty</h3>
-              <p className="mt-3 leading-relaxed text-muted">
-                Certyfikaty TÜV SÜD i TÜV Rheinland (IEC 61215, IEC 61730), atesty CE, testy odporności na
-                PID, mgłę solną i amoniak oraz ISO 9001, 14001 i 45001 fabryki. Przy każdym certyfikacie
-                podajemy dokładny zakres mocy, który obejmuje.
-              </p>
-            </div>
-            <div className="border-t border-ink/80 pt-6">
-              <h3 className="font-semibold">Producent</h3>
-              <p className="mt-3 leading-relaxed text-muted">
-                Worldwide Energy and Manufacturing USA Co., Ltd. — według katalogu firma działa od 1993 r.
-                (Kalifornia), marka Amerisolar od 2007 r.
-              </p>
-            </div>
+            {t.trust(v).map((x) => (
+              <div key={x.title} className="border-t border-ink/80 pt-6">
+                <h3 className="font-semibold">{x.title}</h3>
+                <p className="mt-3 leading-relaxed text-muted">{x.text}</p>
+              </div>
+            ))}
           </div>
         </Container>
       </section>
@@ -841,20 +673,18 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
       <section className="border-t border-line bg-paper py-20 sm:py-28">
         <Container className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">
           <div>
-            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">
-              Pytania o panele fotowoltaiczne w hurcie
-            </h2>
-            <Link href={RFQ_PATH} className={buttonClass("primary", "mt-8")}>
-              Zadaj pytanie w zapytaniu
+            <h2 className="font-wide text-3xl font-semibold sm:text-4xl">{t.faqTitle}</h2>
+            <Link href={href(site, "rfq")} className={buttonClass("primary", "mt-8")}>
+              {t.faqCta}
             </Link>
             <EmailQuoteLink
-              email={site.company.email}
-              subject="Pytanie o moduły Amerisolar"
-              prefix="albo napisz:"
+              site={site}
+              subject={m.email.subjectQuestion}
+              prefix="prefixOr"
               className="mt-4 flex"
             />
           </div>
-          <FaqAccordion items={homeFaq} />
+          <FaqAccordion items={faq} />
         </Container>
       </section>
 
@@ -888,7 +718,7 @@ function Segment({
   valueLabel,
   href,
   cta,
-  email,
+  site,
   model,
   children,
 }: {
@@ -898,7 +728,7 @@ function Segment({
   valueLabel: string;
   href: string;
   cta: string;
-  email: string | null;
+  site: Site;
   model?: string;
   children: React.ReactNode;
 }) {
@@ -914,7 +744,7 @@ function Segment({
       <Link href={href} className="mt-6 font-semibold text-sun-deep hover:underline">
         {cta}
       </Link>
-      <EmailQuoteLink email={email} model={model} prefix="lub napisz:" className="mt-2" />
+      <EmailQuoteLink site={site} model={model} prefix="prefixShort" className="mt-2" />
     </article>
   );
 }

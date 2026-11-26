@@ -4,6 +4,8 @@
 // Certyfikat przypisujemy modelowi wyłącznie w zakresie mocy z certyfikatu (CLAUDE.md §6).
 import { z } from "zod";
 import { products, type Product } from "@amerisolar/content";
+import { tpl, type Formatter } from "./i18n";
+import type { Messages } from "@/messages";
 import raw from "../../../data/documents.json" with { type: "json" };
 
 const fileSchema = z.object({
@@ -73,10 +75,17 @@ export const certificatesInCategory = (cat: CertCategory) =>
     (c) => c.category === cat && (c.coverage.length === 0 || coverageOf(c).length > 0),
   );
 
-/** Opis objęcia: „cały zakres oferty 430–450 W” albo „klasy 690–700 W (z oferowanych 690–720 W)”. */
-export function coverageLabel(c: Coverage): string {
-  const r = (a: number[]) => (a.length === 1 ? `${a[0]} W` : `${Math.min(...a)}–${Math.max(...a)} W`);
+/** Opis objęcia: „pełen zakres oferty 430–450 W” albo „klasy 690–700 W (w ofercie 690–720 W)”. */
+export function coverageLabel(c: Coverage, m: Messages, f: Formatter): string {
+  const r = (a: number[]) => f.range(Math.min(...a), Math.max(...a), "W", 0);
+  const t = m.catalogLib.cert;
   return c.full
-    ? `pełen zakres oferty ${r(c.product.power_bins_w)}`
-    : `klasy ${r(c.covered)} (w ofercie ${r(c.product.power_bins_w)})`;
+    ? tpl(t.fullRange, { range: r(c.product.power_bins_w) })
+    : tpl(t.partial, { covered: r(c.covered), offer: r(c.product.power_bins_w) });
+}
+
+/** Tytuł dokumentu w języku serwisu (fallback: tytuł z rejestru). */
+export function docTitle(doc: DocFile, m: Messages, model?: string): string {
+  if (model) return tpl(m.docTitles.datasheet ?? doc.title, { model });
+  return m.docTitles[doc.file] ?? doc.title;
 }

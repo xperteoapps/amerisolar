@@ -3,6 +3,7 @@
 // ZAKAZ: AggregateRating / Review. `offers` tylko przy prawdziwej cenie (domyślnie brak).
 import { powerRange, type Product } from "@amerisolar/content";
 import { absoluteUrl, type Site } from "../sites";
+import type { Messages } from "@/messages";
 
 type Thing = Record<string, unknown>;
 
@@ -22,7 +23,7 @@ export function organizationLd(site: Site): Thing {
     "@id": `${absoluteUrl(site, "/")}#organization`,
     url: absoluteUrl(site, "/"),
     // TODO(klient): nazwa prawna, NIP, adres — do czasu uzupełnienia pola są pomijane.
-    ...(c.name ? { name: c.name, legalName: c.name } : { name: "Amerisolar Polska" }),
+    ...(c.name ? { name: c.name, legalName: c.name } : { name: `Amerisolar ${site.switchLabel}` }),
     ...(c.vatId ? { vatID: c.vatId } : {}),
     ...(c.email ? { email: c.email } : {}),
     ...(c.phone ? { telephone: c.phone } : {}),
@@ -93,7 +94,8 @@ export function articleLd(
 }
 
 /** Product bez offers/ratingów; parametry jako additionalProperty (wartości 1:1 z products.json). */
-export function productLd(site: Site, p: Product, path: string): Thing {
+export function productLd(site: Site, p: Product, path: string, m: Messages): Thing {
+  const t = m.product.ld;
   const { min, max } = powerRange(p);
   const [length, width, thickness] = p.dimensions_mm;
   const prop = (name: string, value: number | string, unitText?: string) => ({
@@ -115,14 +117,14 @@ export function productLd(site: Site, p: Product, path: string): Thing {
     width: { "@type": "QuantitativeValue", value: width, unitCode: "MMT" },
     height: { "@type": "QuantitativeValue", value: length, unitCode: "MMT" },
     additionalProperty: [
-      prop("Technologia", p.family),
-      prop("Moc maksymalna (STC)", `${min}–${max}`, "W"),
-      prop("Sprawność maksymalna", Math.max(...p.efficiency_pct), "%"),
-      prop("Liczba ogniw", p.cells),
-      prop("Bifacjalny", p.bifacial ? "tak" : "nie"),
-      prop("Współczynnik temperaturowy Pmax", p.temp_coeff.pmax_pct_per_c, "%/°C"),
-      prop("Gwarancja produktowa", p.warranty_years.product, "lat"),
-      prop("Gwarancja liniowa mocy", p.warranty_years.linear_power, "lat"),
+      prop(t.technology, p.family),
+      prop(t.power, `${min}–${max}`, "W"),
+      prop(t.eff, Math.max(...p.efficiency_pct), "%"),
+      prop(t.cells, p.cells),
+      prop(t.bifacial, p.bifacial ? m.common.yes : m.common.no),
+      prop(t.coeff, p.temp_coeff.pmax_pct_per_c, "%/°C"),
+      prop(t.warrantyP, p.warranty_years.product, t.years),
+      prop(t.warrantyL, p.warranty_years.linear_power, t.years),
     ],
   };
 }

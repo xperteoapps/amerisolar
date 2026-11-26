@@ -4,10 +4,11 @@
 // Każda odznaka prowadzi do odpowiedniej sekcji strony z certyfikatami (dane: data/documents.json).
 import Link from "next/link";
 import { Container } from "@amerisolar/ui";
-import { formatDate } from "@/lib/catalog";
 import { documents } from "@/lib/documents";
-
-const DOCS = "/certyfikaty-i-dokumenty/";
+import { formatter, tpl } from "@/lib/i18n";
+import { href } from "@/lib/routes";
+import type { Site } from "@/lib/sites";
+import { messagesFor, type Messages } from "@/messages";
 
 type Badge = {
   title: string;
@@ -16,15 +17,15 @@ type Badge = {
   icon: "shield" | "ce" | "drop" | "leaf" | "factory" | "cycle";
 };
 
-const badges: Badge[] = [
+const badgesFor = (DOCS: string, t: Messages["certBadges"]): Badge[] => [
   { title: "TÜV SÜD", sub: "IEC 61215, IEC 61730", href: `${DOCS}#product`, icon: "shield" },
   { title: "TÜV Rheinland", sub: "IEC 61215, IEC 61730", href: `${DOCS}#product`, icon: "shield" },
-  { title: "Atesty CE", sub: "EN IEC 61730, TÜV SÜD", href: `${DOCS}#ce`, icon: "ce" },
+  { title: t.ce, sub: "EN IEC 61730, TÜV SÜD", href: `${DOCS}#ce`, icon: "ce" },
   { title: "Anti-PID", sub: "IEC TS 62804-1", href: `${DOCS}#tests`, icon: "shield" },
-  { title: "Mgła solna", sub: "IEC 61701", href: `${DOCS}#tests`, icon: "drop" },
-  { title: "Amoniak", sub: "IEC 62716", href: `${DOCS}#tests`, icon: "leaf" },
-  { title: "ISO 9001, 14001, 45001", sub: "fabryka w Nantong", href: `${DOCS}#iso`, icon: "factory" },
-  { title: "PV CYCLE", sub: "recykling, dyrektywa WEEE", href: `${DOCS}#weee`, icon: "cycle" },
+  { title: t.salt, sub: "IEC 61701", href: `${DOCS}#tests`, icon: "drop" },
+  { title: t.ammonia, sub: "IEC 62716", href: `${DOCS}#tests`, icon: "leaf" },
+  { title: "ISO 9001, 14001, 45001", sub: t.factory, href: `${DOCS}#iso`, icon: "factory" },
+  { title: "PV CYCLE", sub: t.weee, href: `${DOCS}#weee`, icon: "cycle" },
 ];
 
 function Icon({ kind }: { kind: Badge["icon"] }) {
@@ -76,7 +77,11 @@ function Icon({ kind }: { kind: Badge["icon"] }) {
   }
 }
 
-export function CertBadges() {
+export function CertBadges({ site }: { site: Site }) {
+  const t = messagesFor(site).certBadges;
+  const f = formatter(site.locale);
+  const DOCS = href(site, "docs");
+  const badges = badgesFor(DOCS, t);
   const longest = documents.certificates
     .filter((c) => c.category === "product" && c.validUntil)
     .map((c) => c.validUntil!)
@@ -86,11 +91,11 @@ export function CertBadges() {
     <section className="border-b border-line bg-paper">
       <Container className="py-14">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h2 className="font-wide text-2xl font-semibold sm:text-3xl">Certyfikaty i atesty</h2>
+          <h2 className="font-wide text-2xl font-semibold sm:text-3xl">{t.title}</h2>
           <p className="max-w-md text-sm text-muted">
-            Badania niezależnych jednostek
-            {longest ? `, certyfikaty ważne nawet do ${formatDate(longest)}` : ""}. Wszystkie dokumenty
-            pobierzesz bez rejestracji.
+            {t.intro}
+            {longest ? tpl(t.introValid, { date: f.date(longest) }) : ""}
+            {t.introTail}
           </p>
         </div>
         <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -112,7 +117,7 @@ export function CertBadges() {
           ))}
         </ul>
         <Link href={DOCS} className="mt-6 inline-block text-sm font-semibold text-forest-700 hover:underline">
-          Zobacz karty katalogowe i certyfikaty
+          {t.more}
         </Link>
       </Container>
     </section>
