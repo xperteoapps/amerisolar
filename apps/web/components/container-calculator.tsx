@@ -5,6 +5,7 @@
 // Schematy modułów renderuje serwer (props `drawings`). Wynik → RFQ z prefillem.
 import { useMemo, useState, type ReactNode } from "react";
 import { buttonClass } from "@amerisolar/ui";
+import { quoteMailto } from "@/lib/contact";
 
 export type CalcModel = {
   slug: string;
@@ -25,10 +26,12 @@ export function ContainerCalculator({
   models,
   drawings,
   rfqPath,
+  email,
 }: {
   models: CalcModel[];
   drawings: Record<string, ReactNode>;
   rfqPath: string;
+  email?: string | null;
 }) {
   const [slug, setSlug] = useState(models.find((m) => m.slug === "as-8m132n-bhc")?.slug ?? models[0]!.slug);
   const m = models.find((x) => x.slug === slug)!;
@@ -280,6 +283,18 @@ export function ContainerCalculator({
             <a href={quoteHref} className={buttonClass("primary", "px-6 py-3.5 text-base")}>
               Zamów wycenę dla {result.containers} {result.containers === 1 ? "kontenera" : "kontenerów"}
             </a>
+            {email ? (
+              <a
+                href={quoteMailto(email, {
+                  model: m.model,
+                  containers: result.containers,
+                  kwp: Math.round(result.kwp),
+                })}
+                className={buttonClass("onDark", "px-5 py-3.5")}
+              >
+                Napisz: {email}
+              </a>
+            ) : null}
             {m.datasheet ? (
               <a href={m.datasheet} download className={buttonClass("onDark", "px-5 py-3.5")}>
                 Karta katalogowa PDF

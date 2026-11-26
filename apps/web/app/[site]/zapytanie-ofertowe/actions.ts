@@ -1,12 +1,13 @@
 "use server";
 // apps/web/app/[site]/zapytanie-ofertowe/actions.ts
-// Zapis zapytania ofertowego: zod + honeypot + Turnstile (gdy skonfigurowany) + limit
-// zgłoszeń z jednego IP → tabela `leads` (service_role tylko na serwerze, CLAUDE.md §2).
+// Zapytanie ofertowe: zod + honeypot + Turnstile (gdy skonfigurowany) → e-mail do sprzedaży
+// (Resend, odbiorca LEAD_NOTIFY_EMAILS lub e-mail serwisu) oraz — gdy Supabase jest
+// skonfigurowany — zapis w tabeli `leads` z limitem zgłoszeń z IP (service_role tylko na serwerze).
 import { createHash } from "node:crypto";
 import { headers } from "next/headers";
-import { createClient } from "@supabase/supabase-js";
-import { rfqSchema, scoreLead, type RfqState } from "@/lib/rfq";
-import { getSite, isSiteKey } from "@/lib/sites";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { leadTypes, rfqSchema, scoreLead, timelines, type RfqInput, type RfqState } from "@/lib/rfq";
+import { getSite, isSiteKey, type Site } from "@/lib/sites";
 
 const RATE_LIMIT = 5; // zgłoszeń na IP w oknie
 const WINDOW_MIN = 30;
@@ -57,17 +58,15 @@ export async function submitRfq(siteKey: string, _prev: RfqState, form: FormData
       };
   }
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    return {
-      status: "error",
-      message: "Formularz nie przyjmuje teraz zgłoszeń. Spróbuj ponownie później.",
-    };
-  }
-  const db = createClient(url, key, { auth: { persistSession: false } });
+  const site = getSite(siteKey);
+  const d = parsed.data;
+  const fallback = site.company.email
+    ? `Napisz bezpośrednio na ${site.company.email}.`
+    : "Spróbuj ponownie później.";
 
-  if (ipHash) {
+  // 1) Baza (opcjonalnie, gdy Supabase skonfigurowany): zapis leada + limit zgłoszeń z IP.
+  const db = supabaseAdmin();
+  if (db && ipHash) {
     const since = new Date(Date.now() - WINDOW_MIN * 60_000).toISOString();
     const { count } = await db
       .from("leads")
@@ -77,17 +76,35 @@ export async function submitRfq(siteKey: string, _prev: RfqState, form: FormData
     if ((count ?? 0) >= RATE_LIMIT) {
       return {
         status: "error",
-        message: "Wysłano już kilka zapytań z tego adresu. Spróbuj ponownie za pół godziny.",
+        message: `Wysłano już kilka zapytań z tego adresu. Spróbuj za pół godziny albo ${fallback.charAt(0).toLowerCase()}${fallback.slice(1)}`,
       };
     }
   }
+  const saved = db ? await saveLead(db, site.countryCode, d, ipHash) : false;
 
-  const site = getSite(siteKey);
-  const { data: siteRow } = await db.from("sites").select("id").eq("country_code", site.countryCode).single();
-  if (!siteRow)
-    return { status: "error", message: "Formularz nie przyjmuje teraz zgłoszeń. Spróbuj ponownie później." };
+  // 2) E-mail do działu sprzedaży (Resend). Odpowiedź („Odpowiedz”) trafia wprost do klienta.
+  const mailed = await notifySales(site, d);
 
-  const d = parsed.data;
+  if (!saved && !mailed) {
+    return { status: "error", message: `Nie udało się wysłać zapytania. ${fallback}` };
+  }
+  return { status: "ok" };
+}
+
+function supabaseAdmin(): SupabaseClient | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  return url && key ? createClient(url, key, { auth: { persistSession: false } }) : null;
+}
+
+async function saveLead(
+  db: SupabaseClient,
+  countryCode: string,
+  d: RfqInput,
+  ipHash: string | null,
+): Promise<boolean> {
+  const { data: siteRow } = await db.from("sites").select("id").eq("country_code", countryCode).single();
+  if (!siteRow) return false;
   const { data: lead, error } = await db
     .from("leads")
     .insert({
@@ -118,12 +135,76 @@ export async function submitRfq(siteKey: string, _prev: RfqState, form: FormData
     })
     .select("id")
     .single();
-
   if (error || !lead) {
     console.error("rfq insert failed", error?.message);
-    return { status: "error", message: "Nie udało się zapisać zapytania. Spróbuj ponownie za chwilę." };
+    return false;
   }
   await db.from("lead_events").insert({ lead_id: lead.id, event: "created", payload: { form: "rfq" } });
-  // TODO: wywołanie edge function `lead-notify` (Resend) po skonfigurowaniu RESEND_API_KEY.
-  return { status: "ok" };
+  return true;
+}
+
+/** Wysyła zapytanie na adres sprzedaży: LEAD_NOTIFY_EMAILS (po przecinku) albo e-mail serwisu. */
+async function notifySales(site: Site, d: RfqInput): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const to = (process.env.LEAD_NOTIFY_EMAILS ?? site.company.email ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!apiKey || to.length === 0) return false;
+
+  const from = process.env.LEAD_FROM_EMAIL ?? `Formularz ${site.domain} <formularz@${site.domain}>`;
+  const label = (list: readonly { value: string; label: string }[], v?: string) =>
+    list.find((x) => x.value === v)?.label ?? v ?? "—";
+  const models = d.product_interest.length ? d.product_interest.join(", ") : "nie wskazano";
+  const qty = [
+    d.quantity_kwp !== undefined ? `${d.quantity_kwp} kWp` : null,
+    d.quantity_containers !== undefined ? `${d.quantity_containers} kontener(y)` : null,
+  ]
+    .filter(Boolean)
+    .join(" / ");
+
+  const text = [
+    `Nowe zapytanie ofertowe z ${site.domain}`,
+    "",
+    `Kto: ${label(leadTypes, d.type)}`,
+    `Firma: ${d.company ?? "—"}${d.nip ? ` (NIP ${d.nip})` : ""}`,
+    `Osoba: ${d.name}`,
+    `E-mail: ${d.email}`,
+    `Telefon: ${d.phone ?? "—"}`,
+    "",
+    `Modele: ${models}`,
+    `Ilość: ${qty || "—"}`,
+    `Miejsce dostawy: ${d.delivery_location ?? "—"}`,
+    `Termin: ${label(timelines, d.timeline)}`,
+    "",
+    "Wiadomość:",
+    d.message ?? "—",
+    "",
+    `Zgoda marketingowa: ${d.consent_marketing ? "tak" : "nie"}`,
+    `Strona wejścia: ${d.landing_page ?? "—"}`,
+    d.utm_source ? `UTM: ${d.utm_source} / ${d.utm_medium ?? ""} / ${d.utm_campaign ?? ""}` : "",
+    `Ocena leada: ${scoreLead(d)}/100`,
+  ].join("\n");
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to,
+        reply_to: d.email,
+        subject: `Zapytanie: ${models} — ${d.company ?? d.name}${qty ? ` (${qty})` : ""}`,
+        text,
+      }),
+    });
+    if (!res.ok) {
+      console.error("rfq mail failed", res.status, await res.text());
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("rfq mail error", e);
+    return false;
+  }
 }

@@ -2,6 +2,7 @@
 import { notFound } from "next/navigation";
 import { Breadcrumbs, Container } from "@amerisolar/ui";
 import { RfqForm } from "@/components/rfq-form";
+import { EmailQuoteButton } from "@/components/email-quote";
 import { RFQ_PATH } from "@/lib/routes";
 import { breadcrumbLd, JsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -51,11 +52,19 @@ export default async function RfqPage({ params }: PageProps<"/[site]/zapytanie-o
             opiszesz potrzebę — model, ilość, miejsce i termin dostawy — tym szybciej przygotujemy konkretną
             ofertę.
           </p>
+          {site.company.email ? (
+            <div className="mt-8 flex max-w-2xl flex-col gap-3 rounded-(--radius-md) border border-line bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-ink">
+                <strong>Wolisz e-mail?</strong> Napisz od razu, bez formularza.
+              </p>
+              <EmailQuoteButton email={site.company.email} variant="primary" className="shrink-0" />
+            </div>
+          ) : null}
         </Container>
       </section>
       <section className="py-14 sm:py-20">
         <Container className="grid gap-16 lg:grid-cols-[1.4fr_0.6fr]">
-          <RfqForm action={action} />
+          <RfqForm action={action} fallbackEmail={site.company.email} />
           <aside className="space-y-8 text-sm leading-relaxed text-muted lg:pt-2">
             <div className="border-t-2 border-leaf pt-5">
               <h2 className="text-base font-semibold text-ink">Co dostaniesz w ofercie</h2>

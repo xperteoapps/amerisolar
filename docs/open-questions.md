@@ -33,3 +33,9 @@
 - [ ] AS-7M108N-BHC: konstrukcja tyłu (szkło vs folia transparentna).
 - [ ] Linia elastyczna: klej i podłoża, testy obciążeń dynamicznych/cyklicznych i EL po gięciu, klasyfikacja ogniowa w układzie dachowym, zasady gwarancji przy klejeniu, zdjęcia montażu.
 - [ ] Prawdziwe zdjęcia produktów, fabryki i polskich realizacji + zgody.
+
+## Wysyłka zapytań e-mailem (26.11.2026)
+
+- [ ] Konto Resend + weryfikacja domeny `amerisolar.pl` (rekordy DNS SPF/DKIM u rejestratora domeny).
+- [ ] Zmienne w Vercel (Production + Preview): `RESEND_API_KEY`, `LEAD_NOTIFY_EMAILS=office@amerisolar.pl`, `LEAD_FROM_EMAIL="Formularz amerisolar.pl <formularz@amerisolar.pl>"`. Bez nich formularz pokazuje komunikat „napisz bezpośrednio na office@amerisolar.pl”.
+- [ ] Tłumaczenia serwisu: EN, DE, HR, RO, UK, HU, IT, FR, ES — decyzja o domenach (ccTLD per kraj vs `amerisolar.pl/en/`), natywna redakcja (CLAUDE.md §11, Faza 5).

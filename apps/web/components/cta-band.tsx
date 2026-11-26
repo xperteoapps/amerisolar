@@ -4,11 +4,13 @@ import Link from "next/link";
 import { buttonClass, Container } from "@amerisolar/ui";
 import { CATALOG_PATH } from "@/lib/catalog";
 import { isReady, RFQ_PATH } from "@/lib/routes";
+import type { Site } from "@/lib/sites";
+import { EmailQuoteButton, EmailQuoteLink } from "./email-quote";
 
 export const rfqHref = (model?: string) =>
   model ? `${RFQ_PATH}?model=${encodeURIComponent(model)}` : RFQ_PATH;
 
-export function CtaBand({ model }: { model?: string }) {
+export function CtaBand({ site, model }: { site: Site; model?: string }) {
   const rfq = isReady(RFQ_PATH);
   return (
     <section className="relative overflow-hidden bg-forest-900 text-white">
@@ -25,6 +27,15 @@ export function CtaBand({ model }: { model?: string }) {
             Podaj model, ilość w kWp lub kontenerach, miejsce dostawy i termin. Przygotujemy ofertę z ceną dla
             wybranej klasy mocy i warunkami dostawy.
           </p>
+          {site.company.email ? (
+            <p className="mt-3 text-forest-100">
+              Nie chcesz wypełniać formularza? Napisz od razu na{" "}
+              <a href={`mailto:${site.company.email}`} className="font-semibold text-white underline">
+                {site.company.email}
+              </a>
+              .
+            </p>
+          ) : null}
         </div>
         <div className="flex shrink-0 flex-wrap gap-3">
           {rfq ? (
@@ -32,6 +43,12 @@ export function CtaBand({ model }: { model?: string }) {
               Zapytaj o cenę kontenerową
             </Link>
           ) : null}
+          <EmailQuoteButton
+            email={site.company.email}
+            model={model}
+            variant="onDark"
+            className="px-6 py-3.5 text-base"
+          />
           {model ? null : (
             <Link href={CATALOG_PATH} className={buttonClass("onDark", "px-6 py-3.5 text-base")}>
               Zobacz moduły
@@ -45,10 +62,12 @@ export function CtaBand({ model }: { model?: string }) {
 
 /** Pośrednie CTA w treści sekcji. */
 export function InlineCta({
+  site,
   text,
   model,
   tone = "light",
 }: {
+  site: Site;
   text: string;
   model?: string;
   tone?: "light" | "dark";
@@ -61,9 +80,12 @@ export function InlineCta({
       }`}
     >
       <p className={`font-medium ${tone === "dark" ? "text-white" : "text-ink"}`}>{text}</p>
-      <Link href={rfqHref(model)} className={buttonClass("primary", "shrink-0")}>
-        Zapytaj o cenę kontenerową
-      </Link>
+      <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+        <Link href={rfqHref(model)} className={buttonClass("primary", "shrink-0")}>
+          Zapytaj o cenę kontenerową
+        </Link>
+        <EmailQuoteLink email={site.company.email} model={model} tone={tone} />
+      </div>
     </div>
   );
 }

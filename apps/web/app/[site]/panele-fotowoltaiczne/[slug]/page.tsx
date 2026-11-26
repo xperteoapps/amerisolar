@@ -15,6 +15,7 @@ import {
   type Product,
 } from "@amerisolar/content";
 import { CtaBand, InlineCta, rfqHref } from "@/components/cta-band";
+import { EmailQuoteLink } from "@/components/email-quote";
 import { DimensionDrawing } from "@/components/module-drawing";
 import { DocLink } from "@/components/doc-link";
 import { certificatesForProduct, coverageLabel, datasheetFor } from "@/lib/documents";
@@ -229,6 +230,7 @@ export default async function ProductPage({ params }: Props) {
                 </a>
               )}
             </div>
+            <EmailQuoteLink email={site.company.email} model={p.model} className="mt-4 flex" />
             <p className="mt-4 text-sm text-muted">
               Dostawy w ilościach kontenerowych bezpośrednio od producenta: {pieces(p, "40ft_hq")} szt. w
               kontenerze 40&apos;HQ.
@@ -408,7 +410,7 @@ export default async function ProductPage({ params }: Props) {
         <Container>
           <h2 className="font-wide text-2xl font-semibold sm:text-3xl">Porównanie z sąsiednimi modelami</h2>
           <Compare items={[p, ...neighbours(p)]} current={p.slug} />
-          <InlineCta text={`Potrzebujesz ${p.model} w ilości kontenerowej?`} model={p.model} />
+          <InlineCta site={site} text={`Potrzebujesz ${p.model} w ilości kontenerowej?`} model={p.model} />
         </Container>
       </section>
 
@@ -420,7 +422,7 @@ export default async function ProductPage({ params }: Props) {
         </Container>
       </section>
 
-      <CtaBand model={p.model} />
+      <CtaBand site={site} model={p.model} />
     </>
   );
 }

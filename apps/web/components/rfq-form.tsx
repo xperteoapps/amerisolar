@@ -12,7 +12,15 @@ const label = "block text-sm font-medium text-ink";
 const input =
   "mt-1.5 block w-full rounded-(--radius-sm) border border-ink/25 bg-white px-3.5 py-2.5 text-[0.98rem] outline-none focus:border-forest-700 focus:ring-2 focus:ring-forest-700/20";
 
-export function RfqForm({ action, defaultModel }: { action: Action; defaultModel?: string }) {
+export function RfqForm({
+  action,
+  defaultModel,
+  fallbackEmail,
+}: {
+  action: Action;
+  defaultModel?: string;
+  fallbackEmail?: string | null;
+}) {
   const [state, serverAction, pending] = useActionState(action, { status: "idle" } as RfqState);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -62,6 +70,15 @@ export function RfqForm({ action, defaultModel }: { action: Action; defaultModel
         <p className="mt-3 max-w-prose text-muted">
           Dziękujemy. Odpowiemy na podany adres e-mail z ofertą lub pytaniami doprecyzowującymi.
         </p>
+        {fallbackEmail ? (
+          <p className="mt-3 max-w-prose text-muted">
+            W pilnej sprawie napisz na{" "}
+            <a href={`mailto:${fallbackEmail}`} className="font-semibold text-ink underline">
+              {fallbackEmail}
+            </a>
+            .
+          </p>
+        ) : null}
       </div>
     );
   }

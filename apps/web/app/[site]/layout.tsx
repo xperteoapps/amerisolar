@@ -61,7 +61,7 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[si
           {children}
         </main>
         <SiteFooter site={site} />
-        <MobileCta />
+        <MobileCta site={site} />
         {/* Vercel Analytics działa bez cookies — dozwolone przed zgodą (CLAUDE.md §9). */}
         <Analytics />
         <SpeedInsights />

@@ -7,6 +7,7 @@ import { Breadcrumbs, Container } from "@amerisolar/ui";
 import { powerRange, range } from "@amerisolar/content";
 import { CtaBand, rfqHref } from "@/components/cta-band";
 import { DocLink } from "@/components/doc-link";
+import { EmailQuoteLink } from "@/components/email-quote";
 import { catalog, formatDate, productPath } from "@/lib/catalog";
 import {
   certificatesForProduct,
@@ -146,6 +147,14 @@ export default async function DocumentsPage({ params }: PageProps<"/[site]/certy
                           Poproś o kartę katalogową
                         </Link>
                       )}
+                      {ds ? null : (
+                        <EmailQuoteLink
+                          email={site.company.email}
+                          subject={`Karta katalogowa ${p.model}`}
+                          prefix="lub napisz:"
+                          className="mt-2 flex"
+                        />
+                      )}
                     </div>
                   </div>
                   <div>
@@ -205,7 +214,7 @@ export default async function DocumentsPage({ params }: PageProps<"/[site]/certy
         );
       })}
 
-      <CtaBand />
+      <CtaBand site={site} />
     </>
   );
 }

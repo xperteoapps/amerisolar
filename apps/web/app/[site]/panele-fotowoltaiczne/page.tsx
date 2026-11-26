@@ -134,7 +134,7 @@ export default async function CatalogPage({ params }: PageProps<"/[site]/panele-
         );
       })}
 
-      <CtaBand />
+      <CtaBand site={site} />
     </>
   );
 }

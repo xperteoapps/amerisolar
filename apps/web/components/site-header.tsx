@@ -1,6 +1,7 @@
 // apps/web/components/site-header.tsx
 import Link from "next/link";
 import { buttonClass, Container } from "@amerisolar/ui";
+import { quoteMailto } from "@/lib/contact";
 import { isReady, plRoutes, RFQ_PATH } from "@/lib/routes";
 import { sites, type Site } from "@/lib/sites";
 import { Logo } from "./logo";
@@ -41,6 +42,14 @@ export function SiteHeader({ site }: { site: Site }) {
               {s.countryCode}
             </a>
           ))}
+          {site.company.email ? (
+            <a
+              href={quoteMailto(site.company.email)}
+              className="hidden text-sm font-medium text-ink/80 hover:text-ink lg:inline"
+            >
+              {site.company.email}
+            </a>
+          ) : null}
           {rfqReady ? (
             <Link href={RFQ_PATH} className={buttonClass("primary", "hidden px-4 py-2.5 sm:inline-flex")}>
               Zapytaj o cenę kontenerową

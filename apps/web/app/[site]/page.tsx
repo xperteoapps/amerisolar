@@ -19,6 +19,8 @@ import { BarList } from "@/components/bars";
 import { CertBadges } from "@/components/cert-badges";
 import { ContainerCalculator, type CalcModel } from "@/components/container-calculator";
 import { CtaBand, InlineCta, rfqHref } from "@/components/cta-band";
+import { EmailQuoteButton, EmailQuoteLink } from "@/components/email-quote";
+import { quoteMailto } from "@/lib/contact";
 import { MediaFigure } from "@/components/media-figure";
 import { DimensionDrawing, ModuleLineup, SegmentLegend } from "@/components/module-drawing";
 import {
@@ -179,6 +181,7 @@ const homeFaq = [
 export default async function HomePage({ params }: PageProps<"/[site]">) {
   const { site: key } = await params;
   if (!isSiteKey(key)) notFound();
+  const site = sites[key];
 
   return (
     <>
@@ -215,6 +218,7 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
               <Link href={CATALOG_PATH} className={buttonClass("onDark", "px-6 py-3.5 text-base")}>
                 Zobacz moduły
               </Link>
+              <EmailQuoteLink email={site.company.email} tone="dark" className="basis-full" />
             </div>
           </div>
           <ul className="mt-12 grid gap-4 border-t border-white/15 pt-6 text-sm text-white/80 sm:grid-cols-2 lg:grid-cols-4">
@@ -277,7 +281,7 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
               Zamówienie kontenerowe trafia bezpośrednio do producenta modułów Amerisolar. Krótszy łańcuch
               dostaw to cena liczona dla całej partii i dokumentacja prosto od producenta.
             </p>
-            <InlineCta text="Masz projekt na kilkaset kWp lub więcej?" />
+            <InlineCta site={site} text="Masz projekt na kilkaset kWp lub więcej?" />
           </div>
           <dl className="grid gap-x-10 gap-y-10 sm:grid-cols-2">
             <Point title="Cena kontenerowa">
@@ -315,6 +319,7 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
               valueLabel="modułów w kontenerze 40'HQ, zależnie od modelu"
               href={rfqHref()}
               cta="Zapytaj o warunki hurtowe"
+              email={site.company.email}
             >
               Pełna linia w jednym źródle — od modułów dachowych po farmowe i elastyczne. Karty katalogowe i
               certyfikaty do dalszej sprzedaży, moduły pakowane na paletach po {Math.min(...palletPcs)}–
@@ -327,6 +332,7 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
               valueLabel="w jednym kontenerze 40'HQ, zależnie od modelu (wyliczenie)"
               href={rfqHref()}
               cta="Zapytaj o dostawy wielokontenerowe"
+              email={site.company.email}
             >
               Zakup kontenerowy bezpośrednio od producenta, bez pośredniczącej hurtowni. Specyfikację, klasy
               mocy i warunki dostawy ustalamy dla całej partii.
@@ -338,6 +344,8 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
               valueLabel={`w kontenerze modułów ${farm.model} ${powerRange(farm).max} W (wyliczenie)`}
               href={rfqHref(farm.model)}
               cta="Zapytaj o dostawę na projekt"
+              email={site.company.email}
+              model={farm.model}
             >
               Moduły {range(roofMin, roofMax, "W")} na dachy firm i carporty oraz{" "}
               {range(powerRange(industrial).min, powerRange(farm).max, "W")} na dachy przemysłowe i farmy
@@ -427,6 +435,14 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
                         >
                           Zapytaj o cenę
                         </Link>
+                        {site.company.email ? (
+                          <a
+                            href={quoteMailto(site.company.email, { model: p.model })}
+                            className="text-sm font-semibold text-forest-700 hover:underline"
+                          >
+                            E-mail<span className="sr-only"> w sprawie {p.model}</span>
+                          </a>
+                        ) : null}
                       </span>
                     </td>
                   </tr>
@@ -568,6 +584,12 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
               <Link href={rfqHref(farm.model)} className={buttonClass("primary", "mt-6")}>
                 Zapytaj o dostawę na farmę
               </Link>
+              <EmailQuoteLink
+                email={site.company.email}
+                model={farm.model}
+                tone="dark"
+                className="mt-4 flex"
+              />
             </div>
           </div>
         </Container>
@@ -586,6 +608,7 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
           <ContainerCalculator
             models={calcModels}
             rfqPath={RFQ_PATH}
+            email={site.company.email}
             drawings={Object.fromEntries(
               catalog.map((p) => [
                 p.slug,
@@ -685,6 +708,11 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
               <Link href={rfqHref(flexHeadline.model)} className={buttonClass("primary")}>
                 Zamów wstępną ocenę obiektu
               </Link>
+              <EmailQuoteButton
+                email={site.company.email}
+                subject="Wstępna ocena obiektu — moduły elastyczne"
+                model={flexHeadline.model}
+              />
               {flex.map((p) => (
                 <Link key={p.slug} href={productPath(p)} className={buttonClass("ghost")}>
                   {p.model}
@@ -766,7 +794,7 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
               </li>
             ))}
           </ol>
-          <InlineCta text="Zacznij od zapytania — to zajmuje kilka minut." />
+          <InlineCta site={site} text="Zacznij od zapytania — to zajmuje kilka minut." />
         </Container>
       </section>
 
@@ -819,12 +847,18 @@ export default async function HomePage({ params }: PageProps<"/[site]">) {
             <Link href={RFQ_PATH} className={buttonClass("primary", "mt-8")}>
               Zadaj pytanie w zapytaniu
             </Link>
+            <EmailQuoteLink
+              email={site.company.email}
+              subject="Pytanie o moduły Amerisolar"
+              prefix="albo napisz:"
+              className="mt-4 flex"
+            />
           </div>
           <FaqAccordion items={homeFaq} />
         </Container>
       </section>
 
-      <CtaBand />
+      <CtaBand site={site} />
     </>
   );
 }
@@ -854,6 +888,8 @@ function Segment({
   valueLabel,
   href,
   cta,
+  email,
+  model,
   children,
 }: {
   color: string;
@@ -862,6 +898,8 @@ function Segment({
   valueLabel: string;
   href: string;
   cta: string;
+  email: string | null;
+  model?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -876,6 +914,7 @@ function Segment({
       <Link href={href} className="mt-6 font-semibold text-sun-deep hover:underline">
         {cta}
       </Link>
+      <EmailQuoteLink email={email} model={model} prefix="lub napisz:" className="mt-2" />
     </article>
   );
 }
