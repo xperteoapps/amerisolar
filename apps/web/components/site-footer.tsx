@@ -17,7 +17,8 @@ export function SiteFooter({ site }: { site: Site }) {
           <Logo tone="light" countryCode={site.countryCode} />
           {/* Dane firmy wymagane w stopce (CLAUDE.md §9). */}
           <div className="space-y-1 text-sm text-forest-300">
-            <p className="text-forest-100">{c.name ?? "TODO(klient): nazwa firmy"}</p>
+            {/* TODO(klient): nazwa firmy — do czasu uzupełnienia w lib/sites.ts linia jest pomijana. */}
+            {c.name ? <p className="text-forest-100">{c.name}</p> : null}
             {c.address ? <p>{c.address}</p> : null}
             {c.vatId ? <p>NIP: {c.vatId}</p> : null}
             {c.phone ? (
