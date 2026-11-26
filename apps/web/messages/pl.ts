@@ -106,6 +106,7 @@ const pl = {
     notFoundText: "Adres mógł się zmienić albo strona nie jest jeszcze opublikowana.",
     notFoundBack: "Przejdź do strony głównej",
     pdf: "PDF",
+    breadcrumbs: "Okruszki",
   },
   routes: {
     home: "Strona główna",

@@ -60,6 +60,7 @@ export default async function CatalogPage({ params }: PageProps<"/[site]/panele-
       <section className="border-b border-line bg-paper">
         <Container className="pt-10 pb-14">
           <Breadcrumbs
+            ariaLabel={m.common.breadcrumbs}
             items={crumbs.map((c) => ({ name: c.name, href: href(site, c.id) }))}
             className="text-muted"
           />

@@ -57,6 +57,7 @@ export default async function DocumentsPage({ params }: PageProps<"/[site]/certy
       <section className="border-b border-line bg-paper">
         <Container className="pt-10 pb-12">
           <Breadcrumbs
+            ariaLabel={m.common.breadcrumbs}
             items={crumbs.map((c) => ({ name: c.name, href: href(site, c.id) }))}
             className="text-muted"
           />

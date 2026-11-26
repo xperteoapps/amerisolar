@@ -162,7 +162,11 @@ export default async function ProductPage({ params }: Props) {
       <section className="border-b border-line bg-paper">
         <Container className="grid gap-12 pt-10 pb-16 lg:grid-cols-[1.25fr_0.75fr]">
           <div>
-            <Breadcrumbs items={crumbs.map((c) => ({ name: c.name, href: c.href }))} className="text-muted" />
+            <Breadcrumbs
+              ariaLabel={m.common.breadcrumbs}
+              items={crumbs.map((c) => ({ name: c.name, href: c.href }))}
+              className="text-muted"
+            />
             <p className="mt-10 text-sm font-medium text-forest-700">{v.kind}</p>
             <h1 className="font-wide mt-2 text-4xl leading-[1.05] font-bold sm:text-5xl lg:text-6xl">
               {p.model}
@@ -227,6 +231,7 @@ export default async function ProductPage({ params }: Props) {
         <Container className="space-y-14">
           <h2 className="font-wide text-2xl font-semibold sm:text-3xl">{t.electricalTitle}</h2>
           <SpecTable
+            rowHeaderLabel={t.param}
             caption={t.stcCaption}
             columns={bins}
             rows={[
@@ -241,6 +246,7 @@ export default async function ProductPage({ params }: Props) {
           />
           {p.noct_pmax_w ? (
             <SpecTable
+              rowHeaderLabel={t.param}
               caption={t.noctCaption}
               columns={bins}
               rows={[{ label: t.rows.pmax, unit: "W", values: p.noct_pmax_w.map((x) => f.num(x, 0)) }]}
@@ -249,6 +255,7 @@ export default async function ProductPage({ params }: Props) {
             <p className="max-w-prose text-muted">{t.noctMissing}</p>
           )}
           <SpecTable
+            rowHeaderLabel={t.param}
             caption={t.tempCaption}
             columns={[t.value]}
             rows={[
@@ -261,6 +268,7 @@ export default async function ProductPage({ params }: Props) {
           />
           {p.bifacial_gain_example ? (
             <SpecTable
+              rowHeaderLabel={t.param}
               caption={tpl(t.bifCaption, { w: p.bifacial_gain_example.base_w })}
               columns={Object.keys(p.bifacial_gain_example.gain_pct_to_pmax_w).map((k) => `+${k}%`)}
               rows={[
