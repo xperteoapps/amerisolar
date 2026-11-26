@@ -25,7 +25,7 @@ export type Site = {
     vatId: string | null; // TODO(klient): NIP
     address: string | null; // TODO(klient)
     phone: string | null; // TODO(klient)
-    email: string | null; // TODO(klient): e-mail handlowy
+    email: string | null; // e-mail kontaktowy (PL: office@amerisolar.pl, 26.11.2026)
   };
 };
 
@@ -39,7 +39,7 @@ export const sites: Record<SiteKey, Site> = {
     domain: "amerisolar.pl",
     aliases: ["www.amerisolar.pl"],
     isLive: false,
-    company: { name: null, vatId: null, address: null, phone: null, email: null },
+    company: { name: null, vatId: null, address: null, phone: null, email: "office@amerisolar.pl" },
   },
 };
 
