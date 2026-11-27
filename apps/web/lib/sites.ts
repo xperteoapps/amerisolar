@@ -65,7 +65,7 @@ export const sites: Record<SiteKey, Site> = {
     domain: "amerisolar.pl",
     basePath: "",
     aliases: ["www.amerisolar.pl"],
-    isLive: false,
+    isLive: true,
     company: company(),
   },
   en: {
@@ -274,11 +274,14 @@ export function resolveRequest(rawHost: string | null, pathname: string, cookieK
   return { kind: "fallback", site: s, production: false, rest: pathname };
 }
 
-/** „/de/” na obcej domenie = przełącznik serwisu. */
+/** „/de/” na obcej domenie = przełącznik serwisu (tylko do serwisów uruchomionych — domena musi istnieć). */
 function switchTarget(rest: string): Site | null {
   const m = /^\/([a-z]{2})\/?$/.exec(rest);
-  return m && isSiteKey(m[1]!) ? sites[m[1] as SiteKey] : null;
+  return m && isSiteKey(m[1]!) && sites[m[1] as SiteKey].isLive ? sites[m[1] as SiteKey] : null;
 }
+
+/** Serwisy uruchomione (isLive): tylko one trafiają do hreflang i przełącznika języków. */
+export const liveSites = (): Site[] => Object.values(sites).filter((s) => s.isLive);
 
 /** Wszystkie hosty produkcyjne (do testów i dokumentacji). */
 export const productionHosts = [...new Set(Object.values(sites).flatMap((s) => [s.domain, ...s.aliases]))];

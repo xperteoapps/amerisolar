@@ -797,7 +797,8 @@ const pl = {
     message: "Wiadomość",
     messagePh: "np. klasa mocy, typ projektu, wymagane dokumenty",
     consent: "* Zgadzam się na kontakt w sprawie tego zapytania.",
-    consentAdmin: "Administratorem danych jest TODO(klient): nazwa firmy.",
+    consentAdmin:
+      "Administratorem danych jest operator serwisu amerisolar.pl (kontakt: office@amerisolar.pl).",
     marketing: "Chcę otrzymywać informacje o dostępności modułów i nowych dostawach (opcjonalnie).",
     submit: "Wyślij zapytanie",
     sending: "Wysyłanie…",

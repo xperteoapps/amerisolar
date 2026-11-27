@@ -3,7 +3,7 @@ import Link from "next/link";
 import { buttonClass, Container } from "@amerisolar/ui";
 import { quoteMailto } from "@/lib/contact";
 import { href, isReady, routes } from "@/lib/routes";
-import { sites, siteKeys, type Site } from "@/lib/sites";
+import { liveSites, sites, siteKeys, type Site } from "@/lib/sites";
 import { messagesFor } from "@/messages";
 import { Logo } from "./logo";
 
@@ -82,6 +82,9 @@ export function SiteHeader({ site }: { site: Site }) {
  * przekierowuje 308 na domenę serwisu, na podglądzie wybiera serwis (ADR 0002).
  */
 function LangSwitch({ site, label }: { site: Site; label: string }) {
+  // Serwis uruchomiony pokazuje tylko inne uruchomione (ich domeny działają); serwis w podglądzie — wszystkie.
+  const keys = site.isLive ? liveSites().map((s) => s.key) : siteKeys;
+  if (keys.length < 2) return null;
   return (
     <details className="relative">
       <summary
@@ -91,7 +94,7 @@ function LangSwitch({ site, label }: { site: Site; label: string }) {
         {site.switchLabel}
       </summary>
       <ul className="absolute right-0 z-40 mt-2 grid w-44 grid-cols-2 gap-1 border border-ink/10 bg-white p-2 shadow-lg">
-        {siteKeys.map((k) => {
+        {keys.map((k) => {
           const s = sites[k];
           return (
             <li key={k}>

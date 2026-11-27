@@ -3,7 +3,7 @@
 // canonical, og:*, hreflang + x-default, noindex dla serwisów przed startem.
 import type { Metadata } from "next";
 import { localPath, type RouteId } from "../routes";
-import { absoluteUrl, sites, X_DEFAULT_SITE, type Site, type SiteKey } from "../sites";
+import { absoluteUrl, liveSites, sites, X_DEFAULT_SITE, type Site, type SiteKey } from "../sites";
 
 export const TITLE_MAX = 60;
 export const DESCRIPTION_MAX = 155;
@@ -31,12 +31,15 @@ export function buildMetadata(seo: PageSeo): Metadata {
 
   const { id, sub } = seo.route;
   const canonical = absoluteUrl(seo.site, localPath(seo.site.lang, id, sub));
-  // hreflang: odpowiednik strony w każdym serwisie + x-default (serwis EU po angielsku).
+  // hreflang: odpowiedniki tylko w serwisach uruchomionych (isLive) + x-default (serwis EU po angielsku),
+  // żeby nie wskazywać Google domen, które jeszcze nie działają. Przy jednym serwisie — bez hreflang.
+  const live = liveSites();
   const languages: Record<string, string> = {};
-  for (const alt of Object.values(sites))
-    languages[alt.hreflang] = absoluteUrl(alt, localPath(alt.lang, id, sub));
-  const xd = sites[X_DEFAULT_SITE as SiteKey];
-  languages["x-default"] = absoluteUrl(xd, localPath(xd.lang, id, sub));
+  if (live.length > 1) {
+    for (const alt of live) languages[alt.hreflang] = absoluteUrl(alt, localPath(alt.lang, id, sub));
+    const xd = sites[X_DEFAULT_SITE as SiteKey];
+    if (xd.isLive) languages["x-default"] = absoluteUrl(xd, localPath(xd.lang, id, sub));
+  }
 
   const index = seo.site.isLive && !seo.noindex;
 
@@ -45,7 +48,7 @@ export function buildMetadata(seo: PageSeo): Metadata {
     description: seo.description,
     alternates: {
       canonical,
-      languages,
+      ...(Object.keys(languages).length > 0 ? { languages } : {}),
     },
     openGraph: {
       type: seo.type ?? "website",
