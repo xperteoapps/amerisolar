@@ -33,6 +33,11 @@ export type Site = {
    * Przełączamy dopiero w Fazie 4 (CLAUDE.md §11), po natywnej redakcji tłumaczenia.
    */
   isLive: boolean;
+  /**
+   * true => serwis działa pod swoją domeną produkcyjną i jest w przełączniku języków
+   * (może być nadal noindex, gdy isLive=false — np. do pokazania kontrahentom przed redakcją).
+   */
+  isPublic: boolean;
   company: {
     name: string | null; // TODO(klient): pełna nazwa firmy partnera
     vatId: string | null; // TODO(klient): NIP
@@ -66,6 +71,7 @@ export const sites: Record<SiteKey, Site> = {
     basePath: "",
     aliases: ["www.amerisolar.pl"],
     isLive: true,
+    isPublic: true,
     company: company(),
   },
   en: {
@@ -77,10 +83,13 @@ export const sites: Record<SiteKey, Site> = {
     hreflang: "en",
     htmlLang: "en",
     currency: "EUR",
-    domain: EU,
-    basePath: "",
-    aliases: [`www.${EU}`],
+    // Tymczasowo (27.11.2026) pod amerisolar.pl/en/ — do zakupu amerisolar.eu.
+    // Po podpięciu .eu: domain: EU, basePath: "", aliases: [`www.${EU}`] + 301 z amerisolar.pl/en/….
+    domain: "amerisolar.pl",
+    basePath: "/en",
+    aliases: [],
     isLive: false,
+    isPublic: true,
     company: company(),
   },
   de: {
@@ -96,6 +105,7 @@ export const sites: Record<SiteKey, Site> = {
     basePath: "/de",
     aliases: [],
     isLive: false,
+    isPublic: false,
     company: company(),
   },
   it: {
@@ -111,6 +121,7 @@ export const sites: Record<SiteKey, Site> = {
     basePath: "/it",
     aliases: [],
     isLive: false,
+    isPublic: false,
     company: company(),
   },
   fr: {
@@ -126,6 +137,7 @@ export const sites: Record<SiteKey, Site> = {
     basePath: "/fr",
     aliases: [],
     isLive: false,
+    isPublic: false,
     company: company(),
   },
   es: {
@@ -141,6 +153,7 @@ export const sites: Record<SiteKey, Site> = {
     basePath: "",
     aliases: ["www.amerisolar.es"],
     isLive: false,
+    isPublic: false,
     company: company(),
   },
   ro: {
@@ -156,6 +169,7 @@ export const sites: Record<SiteKey, Site> = {
     basePath: "",
     aliases: ["www.amerisolar.ro"],
     isLive: false,
+    isPublic: false,
     company: company(),
   },
   hr: {
@@ -171,6 +185,7 @@ export const sites: Record<SiteKey, Site> = {
     basePath: "",
     aliases: ["www.amerisolar.hr"],
     isLive: false,
+    isPublic: false,
     company: company(),
   },
   hu: {
@@ -186,6 +201,7 @@ export const sites: Record<SiteKey, Site> = {
     basePath: "",
     aliases: ["www.amerisolar.hu"],
     isLive: false,
+    isPublic: false,
     company: company(),
   },
   ua: {
@@ -201,6 +217,7 @@ export const sites: Record<SiteKey, Site> = {
     basePath: "",
     aliases: ["www.amerisolar.com.ua"],
     isLive: false,
+    isPublic: false,
     company: company(),
   },
 };
@@ -277,11 +294,14 @@ export function resolveRequest(rawHost: string | null, pathname: string, cookieK
 /** „/de/” na obcej domenie = przełącznik serwisu (tylko do serwisów uruchomionych — domena musi istnieć). */
 function switchTarget(rest: string): Site | null {
   const m = /^\/([a-z]{2})\/?$/.exec(rest);
-  return m && isSiteKey(m[1]!) && sites[m[1] as SiteKey].isLive ? sites[m[1] as SiteKey] : null;
+  return m && isSiteKey(m[1]!) && sites[m[1] as SiteKey].isPublic ? sites[m[1] as SiteKey] : null;
 }
 
-/** Serwisy uruchomione (isLive): tylko one trafiają do hreflang i przełącznika języków. */
+/** Serwisy indeksowane (isLive): tylko one trafiają do hreflang. */
 export const liveSites = (): Site[] => Object.values(sites).filter((s) => s.isLive);
+
+/** Serwisy dostępne pod domeną produkcyjną (isPublic): przełącznik języków. */
+export const publicSites = (): Site[] => Object.values(sites).filter((s) => s.isPublic);
 
 /** Wszystkie hosty produkcyjne (do testów i dokumentacji). */
 export const productionHosts = [...new Set(Object.values(sites).flatMap((s) => [s.domain, ...s.aliases]))];
