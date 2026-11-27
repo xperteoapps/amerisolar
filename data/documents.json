@@ -1,0 +1,413 @@
+{
+  "_meta": {
+    "rule": "Rejestr plików do pobrania. Pliki leżą w apps/web/public/dokumenty/. Wpis dodajemy dopiero, gdy plik jest w repo — strona pokazuje link tylko dla istniejących wpisów. Certyfikaty: `coverage` = modele i zakres mocy dokładnie wg certyfikatu (sprawdzone z PDF 21.11.2026); strona pokazuje część wspólną z ofertą."
+  },
+  "datasheets": {
+    "as-7m108n-bhc": {
+      "file": "/dokumenty/amerisolar-as-7m108n-bhc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M108N-BHC",
+      "version": "EN-V1.0-2024",
+      "lang": "EN",
+      "sizeKb": 865
+    },
+    "as-7m120n-hc": {
+      "file": "/dokumenty/amerisolar-as-7m120n-hc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M120N-HC",
+      "version": "EN-V1.0-2024",
+      "lang": "EN",
+      "sizeKb": 974
+    },
+    "as-7m120n-bhc": {
+      "file": "/dokumenty/amerisolar-as-7m120n-bhc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M120N-BHC",
+      "version": "EN-V1.0-2024",
+      "lang": "EN",
+      "sizeKb": 1008
+    },
+    "as-7m144n-hc": {
+      "file": "/dokumenty/amerisolar-as-7m144n-hc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M144N-HC",
+      "version": "EN-V1.0-2024",
+      "lang": "EN",
+      "sizeKb": 985
+    },
+    "as-8m132n-bhc": {
+      "file": "/dokumenty/amerisolar-as-8m132n-bhc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-8M132N-BHC",
+      "version": "EN-V1.0-2024",
+      "lang": "EN",
+      "sizeKb": 994
+    },
+    "as-7m144nfl-hc-black": {
+      "file": "/dokumenty/amerisolar-as-7m144nfl-hc-black-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M144NFL-HC Black",
+      "version": "EN-V1.0-2025",
+      "lang": "EN",
+      "sizeKb": 757
+    },
+    "as-7m132fl-hc": {
+      "file": "/dokumenty/amerisolar-as-7m132fl-hc-karta-katalogowa.pdf",
+      "title": "Karta katalogowa AS-7M132FL-HC",
+      "version": "EN-V1.0-2025",
+      "lang": "EN",
+      "sizeKb": 1271
+    }
+  },
+  "certificates": [
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-z2-093522-0021.pdf",
+      "sizeKb": 402,
+      "lang": "EN",
+      "category": "product",
+      "title": "Certyfikat TÜV SÜD Z2 093522 0021",
+      "number": "Z2 093522 0021 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "standards": [
+        "IEC 61215-1:2021",
+        "IEC 61215-1-1:2021",
+        "IEC 61215-2:2021",
+        "IEC 61730-1:2016",
+        "IEC 61730-2:2016"
+      ],
+      "issued": "2024-07-08",
+      "validUntil": "2029-04-17",
+      "coverage": [
+        {
+          "model": "AS-7M108N-BHC",
+          "range": [415, 465]
+        },
+        {
+          "model": "AS-7M120N-BHC",
+          "range": [460, 520]
+        },
+        {
+          "model": "AS-8M132N-BHC",
+          "range": [675, 700]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-z2-093522-0023.pdf",
+      "sizeKb": 400,
+      "lang": "EN",
+      "category": "product",
+      "title": "Certyfikat TÜV SÜD Z2 093522 0023",
+      "number": "Z2 093522 0023 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "standards": [
+        "IEC 61215-1:2021",
+        "IEC 61215-1-1:2021",
+        "IEC 61215-2:2021",
+        "IEC 61730-1:2016",
+        "IEC 61730-2:2016"
+      ],
+      "issued": "2024-07-08",
+      "validUntil": "2029-04-17",
+      "coverage": [
+        {
+          "model": "AS-7M120N-HC",
+          "range": [500, 520]
+        },
+        {
+          "model": "AS-7M144N-HC",
+          "range": [600, 620]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-tuv-rheinland-pv-50674535-0001.pdf",
+      "sizeKb": 1747,
+      "lang": "EN",
+      "category": "product",
+      "title": "Certyfikat TÜV Rheinland PV 50674535 0001",
+      "number": "PV 50674535 0001",
+      "body": "TÜV Rheinland LGA Products GmbH",
+      "standards": [
+        "IEC 61215-1:2021",
+        "IEC 61215-1-1:2021",
+        "IEC 61215-2:2021",
+        "IEC 61730-1:2023",
+        "IEC 61730-2:2023",
+        "EN IEC 61215:2021",
+        "EN IEC 61730:2018"
+      ],
+      "issued": "2025-04-24",
+      "validUntil": "2027-08-17",
+      "coverage": [
+        {
+          "model": "AS-8M132N-BHC",
+          "range": [695, 725]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-z2-093522-0025.pdf",
+      "sizeKb": 368,
+      "lang": "EN",
+      "category": "product",
+      "title": "Certyfikat TÜV SÜD Z2 093522 0025",
+      "number": "Z2 093522 0025 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "standards": [
+        "IEC 61215-1:2016",
+        "IEC 61215-1-1:2016",
+        "IEC 61215-2:2016",
+        "IEC 61730-1:2016",
+        "IEC 61730-2:2016"
+      ],
+      "issued": "2025-04-11",
+      "validUntil": "2029-03-31",
+      "coverage": [
+        {
+          "model": "AS-7M132FL-HC",
+          "range": [460, 475]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-z2-093522-0030.pdf",
+      "sizeKb": 370,
+      "lang": "EN",
+      "category": "product",
+      "title": "Certyfikat TÜV SÜD Z2 093522 0030",
+      "number": "Z2 093522 0030 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "standards": [
+        "IEC 61215-1:2021",
+        "IEC 61215-1-1:2021",
+        "IEC 61215-2:2021",
+        "IEC 61730-1:2023",
+        "IEC 61730-2:2023"
+      ],
+      "issued": "2026-03-19",
+      "validUntil": "2031-01-15",
+      "coverage": [
+        {
+          "model": "AS-7M144NFL-HC",
+          "range": [550, 575]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-n8a-093522-0022-ce.pdf",
+      "sizeKb": 397,
+      "lang": "EN",
+      "category": "ce",
+      "title": "Atest zgodności CE TÜV SÜD N8A 093522 0022",
+      "number": "N8A 093522 0022 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "standards": ["EN IEC 61730-1:2018", "EN IEC 61730-2:2018"],
+      "issued": "2024-07-08",
+      "coverage": [
+        {
+          "model": "AS-7M108N-BHC",
+          "range": [415, 465]
+        },
+        {
+          "model": "AS-7M120N-BHC",
+          "range": [460, 520]
+        },
+        {
+          "model": "AS-8M132N-BHC",
+          "range": [675, 700]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-n8a-093522-0024-ce.pdf",
+      "sizeKb": 384,
+      "lang": "EN",
+      "category": "ce",
+      "title": "Atest zgodności CE TÜV SÜD N8A 093522 0024",
+      "number": "N8A 093522 0024 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "standards": ["EN IEC 61730-1:2018", "EN IEC 61730-2:2018"],
+      "issued": "2024-07-08",
+      "coverage": [
+        {
+          "model": "AS-7M120N-HC",
+          "range": [500, 520]
+        },
+        {
+          "model": "AS-7M144N-HC",
+          "range": [600, 620]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-n8a-093522-0027-ce.pdf",
+      "sizeKb": 351,
+      "lang": "EN",
+      "category": "ce",
+      "title": "Atest zgodności CE TÜV SÜD N8A 093522 0027",
+      "number": "N8A 093522 0027 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "standards": ["EN IEC 61730-1:2018", "EN IEC 61730-2:2018"],
+      "issued": "2025-12-19",
+      "coverage": [
+        {
+          "model": "AS-7M132FL-HC",
+          "range": [460, 475]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-n8a-093522-0031-ce.pdf",
+      "sizeKb": 354,
+      "lang": "EN",
+      "category": "ce",
+      "title": "Atest zgodności CE TÜV SÜD N8A 093522 0031",
+      "number": "N8A 093522 0031 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "standards": ["EN IEC 61730-1:2018", "EN IEC 61730-2:2018"],
+      "issued": "2026-03-19",
+      "coverage": [
+        {
+          "model": "AS-7M144NFL-HC",
+          "range": [550, 575]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-z2-093522-0018-anti-pid.pdf",
+      "sizeKb": 497,
+      "lang": "EN",
+      "category": "tests",
+      "title": "Odporność na PID — TÜV SÜD Z2 093522 0018",
+      "number": "Z2 093522 0018 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "standards": [
+        "IEC TS 62804-1:2015",
+        "IEC 61215-1:2016",
+        "IEC 61215-1-1:2016",
+        "IEC 61215-2:2016",
+        "IEC 61730-1:2016",
+        "IEC 61730-2:2016"
+      ],
+      "issued": "2023-10-19",
+      "validUntil": "2028-03-04",
+      "coverage": [
+        {
+          "model": "AS-7M108N-BHC",
+          "range": [390, 435]
+        },
+        {
+          "model": "AS-7M120N-BHC",
+          "range": [430, 480]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-z2-093522-0019-mgla-solna.pdf",
+      "sizeKb": 529,
+      "lang": "EN",
+      "category": "tests",
+      "title": "Odporność na mgłę solną — TÜV SÜD Z2 093522 0019",
+      "number": "Z2 093522 0019 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "standards": ["IEC 61701:2020"],
+      "issued": "2023-10-11",
+      "validUntil": "2028-03-04",
+      "coverage": [
+        {
+          "model": "AS-7M108N-BHC",
+          "range": [390, 435]
+        },
+        {
+          "model": "AS-7M120N-BHC",
+          "range": [430, 480]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-tuv-sud-z2-093522-0020-amoniak.pdf",
+      "sizeKb": 519,
+      "lang": "EN",
+      "category": "tests",
+      "title": "Odporność na amoniak — TÜV SÜD Z2 093522 0020",
+      "number": "Z2 093522 0020 Rev. 00",
+      "body": "TÜV SÜD Product Service GmbH",
+      "standards": ["IEC 62716:2013"],
+      "issued": "2023-10-11",
+      "validUntil": "2028-03-04",
+      "coverage": [
+        {
+          "model": "AS-7M108N-BHC",
+          "range": [390, 435]
+        },
+        {
+          "model": "AS-7M120N-BHC",
+          "range": [430, 480]
+        }
+      ]
+    },
+    {
+      "file": "/dokumenty/amerisolar-iso-9001.pdf",
+      "sizeKb": 1050,
+      "lang": "EN",
+      "category": "iso",
+      "title": "ISO 9001:2015 — zarządzanie jakością",
+      "number": "00726Q01668R001",
+      "body": "Zhongjian Certification Co., Ltd.",
+      "holder": "World Wide Energy and Manufacturing (Nantong) Co., Ltd.",
+      "standards": ["ISO 9001:2015"],
+      "issued": "2026-06-09",
+      "validUntil": "2029-06-08",
+      "coverage": []
+    },
+    {
+      "file": "/dokumenty/amerisolar-iso-14001.pdf",
+      "sizeKb": 1276,
+      "lang": "EN",
+      "category": "iso",
+      "title": "ISO 14001:2015 — zarządzanie środowiskowe",
+      "number": "00726E01204R001",
+      "body": "Zhongjian Certification Co., Ltd.",
+      "holder": "World Wide Energy and Manufacturing (Nantong) Co., Ltd.",
+      "standards": ["ISO 14001:2015"],
+      "issued": "2026-06-09",
+      "validUntil": "2029-06-08",
+      "coverage": []
+    },
+    {
+      "file": "/dokumenty/amerisolar-iso-45001.pdf",
+      "sizeKb": 1244,
+      "lang": "EN",
+      "category": "iso",
+      "title": "ISO 45001:2018 — BHP",
+      "number": "00726S01132R001",
+      "body": "Zhongjian Certification Co., Ltd.",
+      "holder": "World Wide Energy and Manufacturing (Nantong) Co., Ltd.",
+      "standards": ["ISO 45001:2018"],
+      "issued": "2026-06-09",
+      "validUntil": "2029-06-08",
+      "coverage": []
+    },
+    {
+      "file": "/dokumenty/amerisolar-pv-cycle-wlochy-2026.pdf",
+      "sizeKb": 1543,
+      "lang": "EN",
+      "category": "weee",
+      "title": "PV CYCLE Włochy — zgodność z WEEE",
+      "number": "5U8O-6KOG-WC9Z-94ZI-GQOS-PBER",
+      "body": "PV CYCLE ITALIA CONSORZIO",
+      "holder": "Worldwide Energy and Manufacturing USA (Amerisolar) Co., Ltd.",
+      "standards": ["Dyrektywa WEEE (EPR)"],
+      "validUntil": "2026-12-31",
+      "coverage": []
+    },
+    {
+      "file": "/dokumenty/amerisolar-pv-cycle-niemcy-weee-2026.pdf",
+      "sizeKb": 1537,
+      "lang": "EN",
+      "category": "weee",
+      "title": "PV CYCLE Niemcy — zgodność z WEEE",
+      "number": "ZJK6-9SFM-6SCO-WFD0-K8AQ-KMVQ",
+      "body": "PV CYCLE Deutschland GmbH",
+      "holder": "Amerisolar Technology USA Limited",
+      "standards": ["Dyrektywa WEEE (EPR)"],
+      "validUntil": "2026-12-31",
+      "coverage": []
+    }
+  ]
+}

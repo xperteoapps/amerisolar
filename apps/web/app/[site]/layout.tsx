@@ -7,23 +7,34 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { MobileCta } from "@/components/mobile-cta";
 import { JsonLd, organizationLd, websiteLd } from "@/lib/seo/jsonld";
 import { absoluteUrl, isSiteKey, siteKeys, sites } from "@/lib/sites";
 import "../globals.css";
 
-// Inter (OFL) hostowany lokalnie: build nie zależy od Google Fonts, zero żądań do stron trzecich.
-// Dwa zestawy znaków jako osobne rodziny — przeglądarka bierze polskie znaki z latin-ext.
-const interLatin = localFont({
-  src: "../fonts/inter-latin-wght-normal.woff2",
+// Archivo (OFL) hostowany lokalnie, osie wght + wdth (szeroka odmiana w nagłówkach).
+// Dwa zestawy znaków jako osobne rodziny — polskie znaki z latin-ext.
+const archivo = localFont({
+  src: "../fonts/archivo-latin-standard-normal.woff2",
   weight: "100 900",
-  variable: "--font-inter",
+  variable: "--font-archivo",
   display: "swap",
 });
-const interLatinExt = localFont({
-  src: "../fonts/inter-latin-ext-wght-normal.woff2",
+const archivoExt = localFont({
+  src: "../fonts/archivo-latin-ext-standard-normal.woff2",
   weight: "100 900",
-  variable: "--font-inter-ext",
+  variable: "--font-archivo-ext",
   display: "swap",
+});
+// Cyrylica (serwis UA): Roboto Flex (OFL), też z osiami wght + wdth. Plik zawiera tylko znaki cyrylicy,
+// więc na serwisach łacińskich przeglądarka go nie pobiera; preload tylko dla UA.
+const cyrillic = localFont({
+  src: "../fonts/roboto-flex-cyrillic-standard-normal.woff2",
+  weight: "100 1000",
+  variable: "--font-cyrillic",
+  display: "swap",
+  preload: false,
+  declarations: [{ prop: "unicode-range", value: "U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116" }],
 });
 
 export function generateStaticParams() {
@@ -54,15 +65,16 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[si
   return (
     <html
       lang={site.htmlLang}
-      className={`${interLatin.variable} ${interLatinExt.variable} h-full antialiased`}
+      className={`${archivo.variable} ${archivoExt.variable} ${cyrillic.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col pb-[4.5rem] md:pb-0">
         <JsonLd data={[organizationLd(site), websiteLd(site)]} />
         <SiteHeader site={site} />
         <main id="tresc" className="flex-1">
           {children}
         </main>
         <SiteFooter site={site} />
+        <MobileCta site={site} />
         {/* Vercel Analytics działa bez cookies — dozwolone przed zgodą (CLAUDE.md §9). */}
         <Analytics />
         <SpeedInsights />

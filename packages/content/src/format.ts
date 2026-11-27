@@ -5,10 +5,13 @@
 const NBSP = " ";
 
 export function formatNumber(value: number, locale = "pl-PL", maxFractionDigits = 2): string {
+  // Typograficzny minus (U+2212) zamiast dywizu.
   return new Intl.NumberFormat(locale, {
     maximumFractionDigits: maxFractionDigits,
     useGrouping: true,
-  }).format(value);
+  })
+    .format(value)
+    .replace("-", "\u2212");
 }
 
 export function withUnit(value: number, unit: string, locale = "pl-PL", maxFractionDigits = 2): string {

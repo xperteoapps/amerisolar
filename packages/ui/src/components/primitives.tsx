@@ -3,15 +3,17 @@
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "../cn";
 
-type Variant = "primary" | "secondary" | "ghost";
+type Variant = "primary" | "secondary" | "ghost" | "onDark";
 
 const buttonBase =
-  "inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-(--radius-sm) px-5 py-3 text-[0.95rem] font-semibold transition-colors disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-accent-400 text-ink hover:bg-accent-500",
-  secondary: "bg-brand-700 text-white hover:bg-brand-900",
-  ghost: "border border-line bg-white text-ink hover:bg-surface",
+  // Żółć słońca tylko dla głównego CTA.
+  primary: "bg-sun text-ink hover:bg-sun-deep",
+  secondary: "bg-forest-900 text-white hover:bg-forest-800",
+  ghost: "border border-ink/20 bg-transparent text-ink hover:border-ink/50",
+  onDark: "border border-white/30 bg-transparent text-white hover:border-white/70",
 };
 
 export function buttonClass(variant: Variant = "primary", className?: string): string {
@@ -26,7 +28,7 @@ export function Button({
   return <button className={buttonClass(variant, className)} {...props} />;
 }
 
-/** Link wyglądający jak przycisk — dla CTA prowadzących do formularzy. */
+/** Link wyglądający jak przycisk — dla linków zewnętrznych/plików. Wewnętrzne: next/link + buttonClass. */
 export function ButtonLink({
   variant = "primary",
   className,
@@ -37,12 +39,6 @@ export function ButtonLink({
 
 export function Container({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <div className={cn("mx-auto w-full max-w-(--container-site) px-4 sm:px-6", className)}>{children}</div>
-  );
-}
-
-export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return (
-    <div className={cn("rounded-(--radius-card) border border-line bg-white p-6", className)}>{children}</div>
+    <div className={cn("mx-auto w-full max-w-(--container-site) px-5 sm:px-8", className)}>{children}</div>
   );
 }

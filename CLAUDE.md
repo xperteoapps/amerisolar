@@ -11,7 +11,7 @@
 | Vercel     | zespół `xperteoapps`, projekt `amerisolar` (`prj_Q67U3RvEc2blBQvfLjyS2cQwkfxS`), Root Directory `apps/web`                                                  |
 | Supabase   | TODO: projekt do założenia (limit planu Free — patrz `docs/open-questions.md`)                                                                              |
 | Next.js    | 16.4 — **`proxy.ts` zamiast `middleware.ts`** (zmiana nazwy w v16), Cache Components włączone. Dokumentacja wersji: `apps/web/node_modules/next/dist/docs/` |
-| Indeksacja | wyłączona (`isLive: false` w `apps/web/lib/sites.ts`) do Fazy 4                                                                                             |
+| Indeksacja | **PL włączona** (`isLive: true` od 27.11.2026); pozostałe serwisy `isLive: false` do natywnej redakcji i podpięcia domen (`apps/web/lib/sites.ts`)          |
 
 ---
 
@@ -19,14 +19,16 @@
 
 Budujemy sieć stron krajowych promujących moduły fotowoltaiczne **Amerisolar** (Worldwide Energy and Manufacturing USA Co., Ltd.). Strony mają **ściągać ruch organiczny i zamieniać go na zapytania ofertowe (leady)**. Zaczynamy od Polski, potem kolejne kraje na tym samym kodzie.
 
+**Model sprzedaży (decyzja klienta, 21.11.2026):** wyłącznie **ilości kontenerowe, bezpośrednio od producenta**. **Brak magazynu w Polsce** — nie oferujemy sprzedaży paletowej z magazynu; dane o paletach pokazujemy tylko jako informację o pakowaniu.
+
 **Główna grupa docelowa (B2B, priorytet):**
 
-1. Instalatorzy i firmy montażowe PV: zakup paletowy i kontenerowy.
-2. EPC, deweloperzy farm PV, inwestorzy: moduły 600–720 W, bifacjalne, double glass.
-3. Hurtownie i dystrybutorzy OZE.
+1. Hurtownie i dystrybutorzy OZE.
+2. Traderzy i importerzy kupujący duże wolumeny (wiele kontenerów).
+3. Firmy montażowe i EPC realizujące duże ilości (dachy przemysłowe, farmy PV, moduły 600–720 W, bifacjalne, double glass).
 4. Właściciele i zarządcy obiektów, na których klasyczny moduł się nie sprawdza: dachy o niskiej nośności, obiekty z drganiami i obciążeniem dynamicznym (stadiony, hale sportowe, areny, obiekty przemysłowe z maszynami), dachy łukowe. Dla nich jest **linia elastyczna**: 2 mm, ok. 3 kg/m², montaż klejony bez przewiertów. Szczegóły w §4A.
 
-**Grupa wtórna (B2C):** właściciele domów. Kierujemy ich do sieci instalatorów-partnerów, a nie do sprzedaży bezpośredniej.
+**B2C:** nie jest grupą docelową (brak sprzedaży detalicznej i magazynu w PL).
 
 Uzasadnienie: cennik producenta jest kontenerowy (FOB, minimum 1×40'). Polski rynek prosumencki zwolnił po zakończeniu programu Mój Prąd. Wzrost mocy PV w Polsce napędzają głównie instalacje powyżej 1 MW.
 
@@ -103,7 +105,7 @@ Minimalny schemat, który rozszerzamy migracjami (stan bazowy: `supabase/migrati
 Slugi po polsku, bez polskich znaków, małymi literami, z myślnikami. Maksymalnie 3 poziomy.
 
 ```
-/                                         Strona główna (B2B: „Moduły PV Amerisolar — dostawy paletowe i kontenerowe”)
+/                                         Strona główna (B2B, H1: „Panele fotowoltaiczne Amerisolar w hurcie — kontenery od producenta”)
 /panele-fotowoltaiczne/                   Katalog z filtrami (moc, technologia, bifacjalne, elastyczne, kolor ramy)
   /panele-fotowoltaiczne/topcon/          Kategorie = landing pages pod klastry fraz
   /panele-fotowoltaiczne/bifacjalne/
@@ -138,9 +140,9 @@ Slugi po polsku, bez polskich znaków, małymi literami, z myślnikami. Maksymal
 /polityka-prywatnosci/  /cookies/  /regulamin/
 ```
 
-**CTA na każdej stronie:** „Zapytaj o cenę kontenerową” (główne), „Pobierz kartę katalogową” (lead magnet: PDF po podaniu e-maila jest opcjonalny, bo karty muszą być też dostępne bez bramki), „Porozmawiaj z inżynierem”. Na mobile przycisk „Zapytaj o ofertę” jest przyklejony do dołu ekranu.
+**CTA na każdej stronie:** „Zapytaj o cenę kontenerową” (główne, prefill modelu `?model=`), „Pobierz kartę katalogową” (lead magnet: PDF po podaniu e-maila jest opcjonalny, bo karty muszą być też dostępne bez bramki), „Porozmawiaj z inżynierem”. Na mobile przycisk „Zapytaj o ofertę” jest przyklejony do dołu ekranu.
 
-**Formularz RFQ (krokowy):** 1) kim jesteś (instalator / EPC / hurtownia / firma / dom), 2) model(e) i ilość (kWp lub palety lub kontenery), 3) miejsce dostawy i termin, 4) kontakt + NIP (opcjonalnie) + zgody RODO. Zapisujemy UTM i landing page.
+**Formularz RFQ (krokowy):** 1) kim jesteś (hurtownia / trader / firma montażowa / EPC / firma), 2) model(e) i ilość (kWp lub palety lub kontenery), 3) miejsce dostawy i termin, 4) kontakt + NIP (opcjonalnie) + zgody RODO. Zapisujemy UTM i landing page.
 
 ---
 
@@ -266,7 +268,15 @@ Pełna mapa trafia do tabeli `keywords` oraz do `docs/keyword-map-pl.md`. Jedna 
 
 - **Jedyne źródło prawdy:** `data/products.json` (wyciąg z kart katalogowych EN-V1.0-2024/2025, katalogu 2026 i certyfikatu TÜV). Nie zaokrąglamy, nie „poprawiamy” i nie wymyślamy parametrów. Plik jest walidowany schematem zod w `packages/content` (błędny plik zatrzymuje build).
 - Pola `to_verify` blokują publikację danego faktu do czasu potwierdzenia przez producenta.
-- **Certyfikaty:** przesłany certyfikat TÜV SÜD nr **Z2 093522 0030** (ważny do 15.01.2031, IEC 61215:2021 / IEC 61730:2023) obejmuje moduły elastyczne **AS-7M144NFL-HC** (550–575 W) i serie **AS-7M…N-HCR**. **Nie obejmuje** modeli AS-7M108N-BHC, AS-7M120N-HC/BHC, AS-7M144N-HC, AS-8M132N-BHC ani AS-7M132FL-HC. Dla nich piszemy tylko to, co jest na karcie („IEC 61215, IEC 61730, CE”), dopóki nie dostaniemy ich certyfikatów.
+- **Certyfikaty (stan 21.11.2026, zweryfikowane z PDF z dysku klienta):** rejestr w `data/documents.json` (pole `coverage`: model + zakres mocy dokładnie wg certyfikatu). Strona pokazuje certyfikat przy modelu **tylko dla klas mocy, które obejmuje** (`lib/documents.ts`). Stan na dziś:
+  - TÜV SÜD Z2 093522 0021 (do 17.04.2029): AS-7M108N-BHC 415–465 W, AS-7M120N-BHC 460–520 W, AS-8M132N-BHC 675–700 W
+  - TÜV SÜD Z2 093522 0023 (do 17.04.2029): AS-7M120N-HC 500–520 W, AS-7M144N-HC 600–620 W — **z oferty tylko 500 W i 600 W**
+  - TÜV Rheinland PV 50674535 0001 (do 17.08.2027): AS-8M132N-BHC 695–725 W
+  - TÜV SÜD Z2 093522 0025 (do 31.03.2029): AS-7M132FL-HC 460–475 W — **480 W nieobjęte**
+  - TÜV SÜD Z2 093522 0030 (do 15.01.2031): AS-7M144NFL-HC 550–575 W
+  - atesty CE TÜV SÜD N8A 0022 / 0024 / 0027 / 0031 (te same zakresy co odpowiednie certyfikaty), testy PID / mgła solna / amoniak Z2 0018–0020 (AS-7M108N-BHC 390–435 W, AS-7M120N-BHC 430–480 W), ISO 9001/14001/45001 fabryki w Nantong (do 08.06.2029), PV CYCLE WEEE Włochy i Niemcy (do 31.12.2026)
+  - pominięte: certyfikaty modeli spoza oferty (P-type, poly, BHCR, BC), krajowe dla rynków pozaeuropejskich (SEC, RETIE, FIDE), MCS (UK), włoskie klasy ogniowe (dotyczą AS-7M132-HC i AS-6M144FL-HC, nie naszych modeli), Top PV Brand 2021 (Brazylia)
+  - do uzyskania: certyfikaty obejmujące AS-7M120N-HC 465–495 W, AS-7M144N-HC 560–595 W, AS-7M132FL-HC 480 W
 - **Ceny:** otrzymany cennik jest FOB, w USD/EUR za Wp, na minimum 1 kontener 40', i był **ważny do 30.10.2026 (wygasł)**. Nie publikujemy cen FOB. Domyślnie stosujemy „Cena na zapytanie”. Ceny publiczne (np. „od X zł/Wp netto, DDP Polska”) wolno pokazać tylko po pisemnej decyzji klienta.
 - **Niespójności do wyjaśnienia** (nie publikować, dopóki nie są rozstrzygnięte): 730 W w cenniku vs 720 W w karcie AS-8M132N-BHC; nazwy „AS-FL7M…” w cenniku vs „AS-7M…FL” w kartach; NOCT w karcie AS-7M120N-BHC (5 kolumn dla 8 klas mocy); modele z cennika bez kart (AS-7M132N-HC 525 W, AS-7M144N-BHC, AS-7M132N-BHCR 650 W).
 - **Domeny producenta:** karty i katalog podają `amerisolar-usa.com` / `sales@amerisolar-usa.com`; strona partnera to `weamerisolar.com`. Linkujemy do tej, którą wskaże klient.
@@ -348,7 +358,8 @@ Bieżąca lista: `docs/open-questions.md`.
 - [ ] Status prawny partnera wobec Amerisolar i zgoda na użycie znaku i domen
 - [x] Strategia domen: ccTLD per kraj (PL: `amerisolar.pl`)
 - [ ] Dane firmy (nazwa, NIP, adres, telefon, e-mail handlowy, osoby do sekcji „Zespół”)
-- [ ] Magazyn w PL? Dostawy paletowe z magazynu czy tylko kontenery? Incoterms dla klientów PL (DDP / DAP / EXW magazyn)
+- [x] Magazyn w PL: **brak**; sprzedaż wyłącznie kontenerowa, bezpośrednio od producenta
+- [ ] Incoterms dla klientów PL (FOB / CIF / DAP / DDP) i minimalna ilość zamówienia (20' czy 40'HQ)
 - [ ] Polityka cenowa na stronie (cena na zapytanie vs „od … zł/Wp”) i aktualny cennik po 30.10.2026
 - [ ] Certyfikaty IEC/TÜV dla modeli spoza certyfikatu Z2 093522 0030, aktualne karty (730 W, modele bez kart)
 - [ ] Prawdziwe zdjęcia produktów, fabryki i polskich realizacji + zgody na publikację
