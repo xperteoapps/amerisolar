@@ -39,6 +39,7 @@
 - [ ] Konto Resend + weryfikacja domeny `amerisolar.pl` (rekordy DNS SPF/DKIM u rejestratora domeny).
 - [ ] Zmienne w Vercel (Production + Preview): `RESEND_API_KEY`, `LEAD_NOTIFY_EMAILS=office@amerisolar.pl`, `LEAD_FROM_EMAIL="Formularz amerisolar.pl <formularz@amerisolar.pl>"`. Bez nich formularz pokazuje komunikat „napisz bezpośrednio na office@amerisolar.pl”.
 - [x] Tłumaczenia serwisu: EN, DE, HR, RO, UK, HU, IT, FR, ES — gotowe w kodzie (ADR 0002), podgląd pod `/{kraj}/` na adresach preview. Domeny: EN/DE/IT/FR na wspólnej `amerisolar.eu` (`/`, `/de/`, `/it/`, `/fr/`), ES `amerisolar.es`, RO `amerisolar.ro`, HR `amerisolar.hr`, HU `amerisolar.hu`, UA `amerisolar.com.ua`.
-- [ ] Zakup i podpięcie w Vercel domen: amerisolar.eu, .es, .ro, .hr, .hu, .com.ua.
+- [ ] Zakup i podpięcie w Vercel domen: amerisolar.eu, .es, .ro (wolna 27.11.2026; Vercel 110,99 USD/rok), .hr, .hu, .com.ua.
+- [ ] EN tymczasowo pod `amerisolar.pl/en/` (noindex, w przełączniku języków). Po zakupie amerisolar.eu: przenieść (`lib/sites.ts`) + 301 z `/en/…`.
 - [ ] Natywna redakcja każdego języka przed włączeniem `isLive` (tłumaczenia wykonane z pomocą AI).
 - [ ] Dane prawne podmiotu (administrator danych w formularzu: `TODO(klient): nazwa firmy`) — dotyczy wszystkich języków.
