@@ -15,14 +15,7 @@ export type SpecTableProps = {
   className?: string;
 };
 
-export function SpecTable({
-  caption,
-  columns,
-  rowHeaderLabel = "Parametr",
-  rows,
-  note,
-  className,
-}: SpecTableProps) {
+export function SpecTable({ caption, columns, rowHeaderLabel = "", rows, note, className }: SpecTableProps) {
   return (
     <figure className={cn("max-w-full", className)}>
       <div className="overflow-x-auto">
@@ -64,9 +57,18 @@ export function SpecTable({
 
 export type Crumb = { name: string; href: string };
 
-export function Breadcrumbs({ items, className }: { items: Crumb[]; className?: string }) {
+export function Breadcrumbs({
+  items,
+  className,
+  ariaLabel = "Breadcrumb",
+}: {
+  items: Crumb[];
+  className?: string;
+  /** Etykieta nawigacji w języku strony. */
+  ariaLabel?: string;
+}) {
   return (
-    <nav aria-label="Okruszki" className={cn("text-sm", className)}>
+    <nav aria-label={ariaLabel} className={cn("text-sm", className)}>
       <ol className="flex flex-wrap items-center gap-1.5">
         {items.map((c, i) => {
           const last = i === items.length - 1;

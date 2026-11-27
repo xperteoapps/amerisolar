@@ -2,7 +2,15 @@
 import type { DocFile } from "@/lib/documents";
 
 /** Link do pobrania PDF (bez bramki e-mail — karty muszą być dostępne swobodnie, CLAUDE.md §4). */
-export function DocLink({ doc, className = "" }: { doc: DocFile; className?: string }) {
+export function DocLink({
+  doc,
+  title,
+  className = "",
+}: {
+  doc: DocFile;
+  title?: string;
+  className?: string;
+}) {
   return (
     <a
       href={doc.file}
@@ -13,7 +21,7 @@ export function DocLink({ doc, className = "" }: { doc: DocFile; className?: str
         <path d="M10 13.5 5.5 9l1.4-1.4L9 9.7V3h2v6.7l2.1-2.1L14.5 9 10 13.5ZM4 15h12v2H4z" />
       </svg>
       <span>
-        {doc.title}
+        {title ?? doc.title}
         <span className="ml-2 font-normal text-muted">
           PDF{doc.lang ? `, ${doc.lang}` : ""}
           {doc.sizeKb ? `, ${doc.sizeKb} kB` : ""}

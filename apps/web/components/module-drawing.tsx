@@ -2,8 +2,11 @@
 // Schematy modułów rysowane z danych z kart katalogowych: wymiary (mm), liczba ogniw
 // (układ 6 kolumn ogniw połówkowych), kolor ramy (frame_color), brak ramy w linii elastycznej.
 // To schematy, nie wizerunek produktu (CLAUDE.md §8) — podpisujemy je jako schematy.
-import { formatNumber, isFlexible, powerRange, type Product } from "@amerisolar/content";
-import { segmentColor, segmentLabel, segmentOf, type Segment } from "@/lib/catalog";
+import { isFlexible, powerRange, type Product } from "@amerisolar/content";
+import { segmentColor, segmentOf, type Segment } from "@/lib/catalog";
+import { formatter, tpl } from "@/lib/i18n";
+import type { Site } from "@/lib/sites";
+import { messagesFor } from "@/messages";
 
 const shortModel = (p: Product) => p.model.replace(/ Black$/, "");
 
@@ -71,14 +74,18 @@ function ModuleFace({ p, x, y }: { p: Product; x: number; y: number }) {
 
 /** Wszystkie moduły w jednej skali (wysokość = długość modułu), z kolorem grupy zastosowań. */
 export function ModuleLineup({
+  site,
   items,
   tone = "dark",
   className,
 }: {
+  site: Site;
   items: Product[];
   tone?: "dark" | "light";
   className?: string;
 }) {
+  const t = messagesFor(site).drawing;
+  const f = formatter(site.locale);
   const gap = 170;
   const labelSpace = 640;
   const maxL = Math.max(...items.map((p) => p.dimensions_mm[0]));
@@ -109,12 +116,12 @@ export function ModuleLineup({
         role="img"
         aria-labelledby="lineup-title lineup-desc"
       >
-        <title id="lineup-title">Moduły Amerisolar w jednej skali</title>
+        <title id="lineup-title">{t.lineupTitle}</title>
         <desc id="lineup-desc">
           {items
             .map(
               (p) =>
-                `${shortModel(p)}${isFlexible(p) ? " (moduł elastyczny)" : ""}: ${p.dimensions_mm[0]} × ${p.dimensions_mm[1]} × ${p.dimensions_mm[2]} mm, ${powerRange(p).min}–${powerRange(p).max} W, ${p.weight_kg} kg`,
+                `${shortModel(p)}${isFlexible(p) ? t.flexSuffix : ""}: ${p.dimensions_mm[0]} × ${p.dimensions_mm[1]} × ${p.dimensions_mm[2]} mm, ${powerRange(p).min}–${powerRange(p).max} W, ${f.num(p.weight_kg)} kg`,
             )
             .join("; ")}
         </desc>
@@ -136,7 +143,7 @@ export function ModuleLineup({
               fontSize={118}
               fontWeight={700}
             >
-              Moduły elastyczne
+              {t.flexHeading}
             </text>
           </g>
         ) : null}
@@ -151,7 +158,7 @@ export function ModuleLineup({
               <ModuleFace p={p} x={x} y={y} />
               {/* wymiary: długość × szerokość */}
               <text x={x + W / 2} y={y - 50} textAnchor="middle" fill={sub} fontSize={94} fontWeight={500}>
-                {formatNumber(L, "pl-PL", 0)} × {formatNumber(W, "pl-PL", 0)} mm
+                {f.num(L, 0)} × {f.num(W, 0)} mm
               </text>
               <rect
                 x={x}
@@ -174,10 +181,10 @@ export function ModuleLineup({
                 fontSize={96}
                 fontWeight={flex ? 700 : 500}
               >
-                grubość {T} mm
+                {tpl(t.thickness, { t: T })}
               </text>
               <text x={x} y={top + maxL + 600} fill={sub} fontSize={96}>
-                {formatNumber(p.weight_kg)} kg
+                {f.num(p.weight_kg)} kg
               </text>
             </g>
           );
@@ -188,7 +195,17 @@ export function ModuleLineup({
 }
 
 /** Rzut z przodu + profil z wymiarami (karta produktu). */
-export function DimensionDrawing({ product, className }: { product: Product; className?: string }) {
+export function DimensionDrawing({
+  site,
+  product,
+  className,
+}: {
+  site: Site;
+  product: Product;
+  className?: string;
+}) {
+  const t = messagesFor(site).drawing;
+  const f = formatter(site.locale);
   const [L, W, T] = product.dimensions_mm;
   const flex = isFlexible(product);
   const pad = 260;
@@ -206,7 +223,7 @@ export function DimensionDrawing({ product, className }: { product: Product; cla
       aria-labelledby={`dim-${product.slug}`}
     >
       <title id={`dim-${product.slug}`}>
-        Schemat wymiarowy {shortModel(product)}: {L} × {W} × {T} mm
+        {tpl(t.dimTitle, { model: shortModel(product), l: L, w: W, t: T })}
       </title>
       <defs>
         <marker
@@ -233,7 +250,7 @@ export function DimensionDrawing({ product, className }: { product: Product; cla
         markerEnd="url(#arr)"
       />
       <text x={pad + W / 2} y={pad - 160} textAnchor="middle" fontSize={80} fill="var(--color-ink)">
-        {formatNumber(W, "pl-PL", 0)} mm
+        {f.num(W, 0)} mm
       </text>
       <line
         x1={pad - 120}
@@ -253,7 +270,7 @@ export function DimensionDrawing({ product, className }: { product: Product; cla
         fill="var(--color-ink)"
         transform={`rotate(-90 ${pad - 160} ${pad + L / 2})`}
       >
-        {formatNumber(L, "pl-PL", 0)} mm
+        {f.num(L, 0)} mm
       </text>
       <rect
         x={pad + W + sideGap}
@@ -273,7 +290,7 @@ export function DimensionDrawing({ product, className }: { product: Product; cla
         {T} mm
       </text>
       <text x={pad + W + sideGap + sideW / 2} y={pad + L + 140} textAnchor="middle" fontSize={56} fill={dim}>
-        profil
+        {t.profile}
       </text>
     </svg>
   );
@@ -281,13 +298,16 @@ export function DimensionDrawing({ product, className }: { product: Product; cla
 
 /** Legenda kolorów grup zastosowań. */
 export function SegmentLegend({
+  site,
   tone = "dark",
   className = "",
 }: {
+  site: Site;
   tone?: "dark" | "light";
   className?: string;
 }) {
   const keys: Segment[] = ["roof", "large", "flex"];
+  const labels = messagesFor(site).catalogLib.segment;
   return (
     <ul
       className={`flex flex-wrap gap-x-6 gap-y-2 text-sm ${tone === "dark" ? "text-forest-300" : "text-muted"} ${className}`}
@@ -295,7 +315,7 @@ export function SegmentLegend({
       {keys.map((k) => (
         <li key={k} className="flex items-center gap-2">
           <span aria-hidden="true" className="h-2 w-6 rounded-full" style={{ background: segmentColor[k] }} />
-          {segmentLabel[k]}
+          {labels[k]}
         </li>
       ))}
     </ul>

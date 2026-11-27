@@ -3,77 +3,76 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumbs, Container } from "@amerisolar/ui";
-import { formatNumber, percent, powerRange, range } from "@amerisolar/content";
+import { powerRange } from "@amerisolar/content";
 import { CtaBand } from "@/components/cta-band";
 import { ModuleLineup } from "@/components/module-drawing";
 import {
   catalog,
-  CATALOG_PATH,
-  groupLabel,
   groupOf,
   kindLabel,
   kwpLabel,
   maxEfficiency,
   pieces,
-  productPath,
   type ProductGroup,
 } from "@/lib/catalog";
 import { datasheetFor } from "@/lib/documents";
+import { formatter, tpl } from "@/lib/i18n";
+import { href, localPath, productHref } from "@/lib/routes";
 import { breadcrumbLd, JsonLd } from "@/lib/seo/jsonld";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { isSiteKey, sites } from "@/lib/sites";
+import { messagesFor } from "@/messages";
 
 export async function generateMetadata({ params }: PageProps<"/[site]/panele-fotowoltaiczne">) {
   const { site: key } = await params;
   if (!isSiteKey(key)) return {};
+  const site = sites[key];
+  const t = messagesFor(site).catalog;
   return buildMetadata({
-    site: sites[key],
-    path: CATALOG_PATH,
-    title: "Panele fotowoltaiczne Amerisolar 430–720 W — katalog",
-    description:
-      "Katalog modułów Amerisolar: TOPCon N-type, bifacjalne, double glass i elastyczne. Pełne parametry z kart katalogowych, pakowanie i kWp na kontener.",
+    site,
+    route: { id: "catalog" },
+    title: t.metaTitle,
+    description: t.metaDescription,
   });
 }
-
-const groupIntro: Record<ProductGroup, string> = {
-  glass:
-    "Moduły z hartowanym szkłem i ramą: na dachy domów i firm, carporty, dachy przemysłowe oraz farmy fotowoltaiczne.",
-  flexible:
-    "Moduły o grubości 2 mm montowane przez klejenie, bez konstrukcji i przewiertów — do dachów o ograniczonej nośności i dachów łukowych.",
-};
 
 export default async function CatalogPage({ params }: PageProps<"/[site]/panele-fotowoltaiczne">) {
   const { site: key } = await params;
   if (!isSiteKey(key)) notFound();
   const site = sites[key];
+  const m = messagesFor(site);
+  const t = m.catalog;
+  const f = formatter(site.locale);
   const groups: ProductGroup[] = ["glass", "flexible"];
+  const crumbs = [
+    { name: m.common.home, id: "home" as const },
+    { name: t.breadcrumb, id: "catalog" as const },
+  ];
 
   return (
     <>
       <JsonLd
-        data={breadcrumbLd(site, [
-          { name: "Strona główna", path: "/" },
-          { name: "Moduły w ofercie", path: CATALOG_PATH },
-        ])}
+        data={breadcrumbLd(
+          site,
+          crumbs.map((c) => ({ name: c.name, path: localPath(site.lang, c.id) })),
+        )}
       />
       <section className="border-b border-line bg-paper">
         <Container className="pt-10 pb-14">
           <Breadcrumbs
-            items={[
-              { name: "Strona główna", href: "/" },
-              { name: "Moduły w ofercie", href: CATALOG_PATH },
-            ]}
+            ariaLabel={m.common.breadcrumbs}
+            items={crumbs.map((c) => ({ name: c.name, href: href(site, c.id) }))}
             className="text-muted"
           />
-          <h1 className="font-wide mt-8 max-w-3xl text-4xl font-bold sm:text-5xl">
-            Moduły w naszej ofercie — panele fotowoltaiczne Amerisolar
-          </h1>
+          <h1 className="font-wide mt-8 max-w-3xl text-4xl font-bold sm:text-5xl">{t.h1}</h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">
-            {catalog.length} modeli od {Math.min(...catalog.map((p) => powerRange(p).min))} do{" "}
-            {Math.max(...catalog.map((p) => powerRange(p).max))} W. Przy każdym module pobierzesz kartę
-            katalogową PDF — od razu, bez rejestracji i bez pisania maila.
+            {tpl(t.lead, {
+              count: catalog.length,
+              min: Math.min(...catalog.map((p) => powerRange(p).min)),
+              max: Math.max(...catalog.map((p) => powerRange(p).max)),
+            })}
           </p>
-          <ModuleLineup items={catalog} tone="light" className="mt-12 h-auto w-full" />
+          <ModuleLineup site={site} items={catalog} tone="light" className="mt-12 h-auto w-full" />
         </Container>
       </section>
 
@@ -83,8 +82,8 @@ export default async function CatalogPage({ params }: PageProps<"/[site]/panele-
           <section key={g} className="py-16 sm:py-20">
             <Container>
               <div className="grid gap-4 md:grid-cols-[1fr_1.4fr] md:items-end">
-                <h2 className="font-wide text-3xl font-semibold">{groupLabel[g]}</h2>
-                <p className="max-w-xl text-muted">{groupIntro[g]}</p>
+                <h2 className="font-wide text-3xl font-semibold">{m.catalogLib.group[g]}</h2>
+                <p className="max-w-xl text-muted">{t.intro[g]}</p>
               </div>
               <ul className="mt-10 border-t-2 border-ink">
                 {items.map((p) => {
@@ -94,21 +93,21 @@ export default async function CatalogPage({ params }: PageProps<"/[site]/panele-
                       key={p.slug}
                       className="grid gap-4 border-b border-line py-7 md:grid-cols-[1.3fr_repeat(4,minmax(0,1fr))_auto] md:items-center"
                     >
-                      <Link href={productPath(p)} className="group block">
+                      <Link href={productHref(site, p.slug)} className="group block">
                         <span className="font-wide block text-xl font-semibold text-forest-700 group-hover:underline">
                           {p.model}
                         </span>
-                        <span className="mt-1 block text-sm text-muted">{kindLabel(p)}</span>
+                        <span className="mt-1 block text-sm text-muted">{kindLabel(p, m)}</span>
                       </Link>
-                      <Stat label="moc" value={range(pr.min, pr.max, "W")} />
-                      <Stat label="sprawność maks." value={percent(maxEfficiency(p))} />
+                      <Stat label={t.stat.power} value={f.range(pr.min, pr.max, "W")} />
+                      <Stat label={t.stat.eff} value={f.pct(maxEfficiency(p))} />
                       <Stat
-                        label="wymiary"
-                        value={`${p.dimensions_mm.map((d) => formatNumber(d, "pl-PL", 0)).join(" × ")} mm`}
+                        label={t.stat.dims}
+                        value={`${p.dimensions_mm.map((d) => f.num(d, 0)).join(" × ")} mm`}
                       />
                       <Stat
-                        label="40'HQ"
-                        value={`${pieces(p, "40ft_hq")} szt., ${kwpLabel(p, "40ft_hq")} kWp`}
+                        label={t.stat.hq}
+                        value={tpl(t.hqValue, { pcs: pieces(p, "40ft_hq"), kwp: kwpLabel(p, "40ft_hq", f) })}
                       />
                       {datasheetFor(p.slug) ? (
                         <a
@@ -119,16 +118,15 @@ export default async function CatalogPage({ params }: PageProps<"/[site]/panele-
                           <svg aria-hidden="true" viewBox="0 0 20 20" className="size-4 fill-forest-700">
                             <path d="M10 13.5 5.5 9l1.4-1.4L9 9.7V3h2v6.7l2.1-2.1L14.5 9 10 13.5ZM4 15h12v2H4z" />
                           </svg>
-                          Karta PDF<span className="sr-only"> {p.model}</span>
+                          {m.common.datasheetPdf}
+                          <span className="sr-only"> {p.model}</span>
                         </a>
                       ) : null}
                     </li>
                   );
                 })}
               </ul>
-              <p className="mt-4 text-sm text-muted">
-                kWp w kontenerze: wyliczenie z liczby sztuk wg karty katalogowej i najwyższej klasy mocy.
-              </p>
+              <p className="mt-4 text-sm text-muted">{t.note}</p>
             </Container>
           </section>
         );

@@ -11,7 +11,7 @@
 | Vercel     | zespół `xperteoapps`, projekt `amerisolar` (`prj_Q67U3RvEc2blBQvfLjyS2cQwkfxS`), Root Directory `apps/web`                                                  |
 | Supabase   | TODO: projekt do założenia (limit planu Free — patrz `docs/open-questions.md`)                                                                              |
 | Next.js    | 16.4 — **`proxy.ts` zamiast `middleware.ts`** (zmiana nazwy w v16), Cache Components włączone. Dokumentacja wersji: `apps/web/node_modules/next/dist/docs/` |
-| Indeksacja | wyłączona (`isLive: false` w `apps/web/lib/sites.ts`) do Fazy 4                                                                                             |
+| Indeksacja | **PL włączona** (`isLive: true` od 27.11.2026); pozostałe serwisy `isLive: false` do natywnej redakcji i podpięcia domen (`apps/web/lib/sites.ts`)          |
 
 ---
 

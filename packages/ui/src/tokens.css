@@ -27,7 +27,8 @@
   --color-cell-line: #8fa1bd;
   --color-flex: #7fb3d5; /* linia elastyczna na rysunkach (tylko grafika) */
 
-  --font-sans: var(--font-archivo), var(--font-archivo-ext), ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    var(--font-archivo), var(--font-archivo-ext), var(--font-cyrillic), ui-sans-serif, system-ui, sans-serif;
 
   --radius-sm: 4px;
   --radius-md: 10px;

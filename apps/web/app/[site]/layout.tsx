@@ -26,6 +26,16 @@ const archivoExt = localFont({
   variable: "--font-archivo-ext",
   display: "swap",
 });
+// Cyrylica (serwis UA): Roboto Flex (OFL), też z osiami wght + wdth. Plik zawiera tylko znaki cyrylicy,
+// więc na serwisach łacińskich przeglądarka go nie pobiera; preload tylko dla UA.
+const cyrillic = localFont({
+  src: "../fonts/roboto-flex-cyrillic-standard-normal.woff2",
+  weight: "100 1000",
+  variable: "--font-cyrillic",
+  display: "swap",
+  preload: false,
+  declarations: [{ prop: "unicode-range", value: "U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116" }],
+});
 
 export function generateStaticParams() {
   return siteKeys.map((site) => ({ site }));
@@ -53,7 +63,10 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[si
   const site = sites[key];
 
   return (
-    <html lang={site.htmlLang} className={`${archivo.variable} ${archivoExt.variable} h-full antialiased`}>
+    <html
+      lang={site.htmlLang}
+      className={`${archivo.variable} ${archivoExt.variable} ${cyrillic.variable} h-full antialiased`}
+    >
       <body className="flex min-h-full flex-col pb-[4.5rem] md:pb-0">
         <JsonLd data={[organizationLd(site), websiteLd(site)]} />
         <SiteHeader site={site} />

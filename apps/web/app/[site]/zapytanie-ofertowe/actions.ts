@@ -6,14 +6,19 @@
 import { createHash } from "node:crypto";
 import { headers } from "next/headers";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { leadTypes, rfqSchema, scoreLead, timelines, type RfqInput, type RfqState } from "@/lib/rfq";
+import { rfqSchema, scoreLead, type RfqInput, type RfqState } from "@/lib/rfq";
+import { tpl } from "@/lib/i18n";
+import { getMessages } from "@/messages";
+import plMessages from "@/messages/pl";
 import { getSite, isSiteKey, type Site } from "@/lib/sites";
 
 const RATE_LIMIT = 5; // zgłoszeń na IP w oknie
 const WINDOW_MIN = 30;
 
 export async function submitRfq(siteKey: string, _prev: RfqState, form: FormData): Promise<RfqState> {
-  if (!isSiteKey(siteKey)) return { status: "error", message: "Nieznany serwis." };
+  if (!isSiteKey(siteKey)) return { status: "error", message: plMessages.form.errors.site };
+  const site = getSite(siteKey);
+  const e = getMessages(site.lang).form.errors;
 
   // Honeypot: pole niewidoczne dla ludzi. Udajemy sukces, żeby nie uczyć botów.
   if (String(form.get("website") ?? "") !== "") return { status: "ok" };
@@ -21,14 +26,14 @@ export async function submitRfq(siteKey: string, _prev: RfqState, form: FormData
   const raw = Object.fromEntries(
     [...form.keys()].map((k) => [k, k === "product_interest" ? form.getAll(k) : form.get(k)]),
   );
-  const parsed = rfqSchema.safeParse(raw);
+  const parsed = rfqSchema(e, site.lang === "pl").safeParse(raw);
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     for (const issue of parsed.error.issues) {
       const key = String(issue.path[0] ?? "form");
       fieldErrors[key] ??= issue.message;
     }
-    return { status: "error", message: "Popraw zaznaczone pola.", fieldErrors };
+    return { status: "error", message: e.fix, fieldErrors };
   }
 
   const h = await headers();
@@ -54,15 +59,12 @@ export async function submitRfq(siteKey: string, _prev: RfqState, form: FormData
     if (!verdict.success)
       return {
         status: "error",
-        message: "Weryfikacja antyspamowa nie powiodła się. Odśwież stronę i spróbuj ponownie.",
+        message: e.spam,
       };
   }
 
-  const site = getSite(siteKey);
   const d = parsed.data;
-  const fallback = site.company.email
-    ? `Napisz bezpośrednio na ${site.company.email}.`
-    : "Spróbuj ponownie później.";
+  const fallback = site.company.email ? tpl(e.fallbackEmail, { email: site.company.email }) : e.fallback;
 
   // 1) Baza (opcjonalnie, gdy Supabase skonfigurowany): zapis leada + limit zgłoszeń z IP.
   const db = supabaseAdmin();
@@ -76,17 +78,17 @@ export async function submitRfq(siteKey: string, _prev: RfqState, form: FormData
     if ((count ?? 0) >= RATE_LIMIT) {
       return {
         status: "error",
-        message: `Wysłano już kilka zapytań z tego adresu. Spróbuj za pół godziny albo ${fallback.charAt(0).toLowerCase()}${fallback.slice(1)}`,
+        message: `${e.rate} ${fallback}`,
       };
     }
   }
-  const saved = db ? await saveLead(db, site.countryCode, d, ipHash) : false;
+  const saved = db ? await saveLead(db, site.countryCode ?? "EU", d, ipHash) : false;
 
   // 2) E-mail do działu sprzedaży (Resend). Odpowiedź („Odpowiedz”) trafia wprost do klienta.
   const mailed = await notifySales(site, d);
 
   if (!saved && !mailed) {
-    return { status: "error", message: `Nie udało się wysłać zapytania. ${fallback}` };
+    return { status: "error", message: `${e.failed} ${fallback}` };
   }
   return { status: "ok" };
 }
@@ -153,8 +155,8 @@ async function notifySales(site: Site, d: RfqInput): Promise<boolean> {
   if (!apiKey || to.length === 0) return false;
 
   const from = process.env.LEAD_FROM_EMAIL ?? `Formularz ${site.domain} <formularz@${site.domain}>`;
-  const label = (list: readonly { value: string; label: string }[], v?: string) =>
-    list.find((x) => x.value === v)?.label ?? v ?? "—";
+  // Mail do działu sprzedaży zawsze po polsku; język serwisu w nagłówku.
+  const f = plMessages.form;
   const models = d.product_interest.length ? d.product_interest.join(", ") : "nie wskazano";
   const qty = [
     d.quantity_kwp !== undefined ? `${d.quantity_kwp} kWp` : null,
@@ -164,10 +166,10 @@ async function notifySales(site: Site, d: RfqInput): Promise<boolean> {
     .join(" / ");
 
   const text = [
-    `Nowe zapytanie ofertowe z ${site.domain}`,
+    `Nowe zapytanie ofertowe z ${site.domain}${site.basePath} (język: ${site.lang.toUpperCase()})`,
     "",
-    `Kto: ${label(leadTypes, d.type)}`,
-    `Firma: ${d.company ?? "—"}${d.nip ? ` (NIP ${d.nip})` : ""}`,
+    `Kto: ${f.types[d.type]}`,
+    `Firma: ${d.company ?? "—"}${d.nip ? ` (NIP/VAT ${d.nip})` : ""}`,
     `Osoba: ${d.name}`,
     `E-mail: ${d.email}`,
     `Telefon: ${d.phone ?? "—"}`,
@@ -175,7 +177,7 @@ async function notifySales(site: Site, d: RfqInput): Promise<boolean> {
     `Modele: ${models}`,
     `Ilość: ${qty || "—"}`,
     `Miejsce dostawy: ${d.delivery_location ?? "—"}`,
-    `Termin: ${label(timelines, d.timeline)}`,
+    `Termin: ${d.timeline ? f.timelines[d.timeline] : "—"}`,
     "",
     "Wiadomość:",
     d.message ?? "—",
@@ -194,7 +196,7 @@ async function notifySales(site: Site, d: RfqInput): Promise<boolean> {
         from,
         to,
         reply_to: d.email,
-        subject: `Zapytanie: ${models} — ${d.company ?? d.name}${qty ? ` (${qty})` : ""}`,
+        subject: `[${site.lang.toUpperCase()}] Zapytanie: ${models} — ${d.company ?? d.name}${qty ? ` (${qty})` : ""}`,
         text,
       }),
     });

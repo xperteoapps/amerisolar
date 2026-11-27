@@ -6,9 +6,12 @@
 // do tego czasu serwowane z CDN Higgsfield przez next/image.
 
 export type MediaAsset = {
+  /** Klucz tekstu alternatywnego w messages → media. */
+  key: string;
   src: string;
   width: number;
   height: number;
+  /** Tekst alternatywny PL (wzorzec; w serwisie z messages → media). */
   alt: string;
   source: "higgsfield" | "photo" | "manufacturer";
   model?: string;
@@ -22,6 +25,7 @@ const AI_CAPTION = "Wizualizacja poglądowa";
 
 export const media = {
   farm: {
+    key: "farm" as const,
     src: `${HF}/hf_20261121_094912_3c5ed8b0-6fda-4588-818c-de868de9938e.png`,
     width: 1536,
     height: 864,
@@ -34,6 +38,7 @@ export const media = {
     caption: AI_CAPTION,
   },
   warehouseWinter: {
+    key: "warehouseWinter" as const,
     src: `${HF}/hf_20261121_094912_c8d8c3b8-7187-428a-9570-442adebc90a4.png`,
     width: 1536,
     height: 864,
@@ -46,6 +51,7 @@ export const media = {
     caption: AI_CAPTION,
   },
   archedHall: {
+    key: "archedHall" as const,
     src: `${HF}/hf_20261121_094911_feaba131-b2cb-4919-b60a-13614f2bdfcf.png`,
     width: 1536,
     height: 864,
@@ -58,6 +64,7 @@ export const media = {
     caption: AI_CAPTION,
   },
   lightRoof: {
+    key: "lightRoof" as const,
     src: `${HF}/hf_20261121_094910_424a4b1a-1757-4c6e-8faf-706611f7a22c.png`,
     width: 1536,
     height: 864,

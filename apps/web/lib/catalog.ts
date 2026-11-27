@@ -3,26 +3,12 @@
 // Wszystkie liczby pochodzą z data/products.json (przez @amerisolar/content).
 // Wartości wyliczone (kWp/kontener, Voc w mrozie) są oznaczane na stronach jako wyliczenia.
 import { certificatesForProduct, coverageLabel } from "./documents";
-import {
-  formatNumber,
-  isFlexible,
-  kwpPer,
-  piecesPer,
-  powerRange,
-  products,
-  type Product,
-} from "@amerisolar/content";
-
-export const CATALOG_PATH = "/panele-fotowoltaiczne/";
-export const productPath = (p: Product) => `${CATALOG_PATH}${p.slug}/`;
+import { isFlexible, kwpPer, piecesPer, powerRange, products, type Product } from "@amerisolar/content";
+import { tpl, type Formatter } from "./i18n";
+import type { Messages } from "@/messages";
 
 export type ProductGroup = "glass" | "flexible";
 export const groupOf = (p: Product): ProductGroup => (isFlexible(p) ? "flexible" : "glass");
-
-export const groupLabel: Record<ProductGroup, string> = {
-  glass: "Moduły szklane TOPCon",
-  flexible: "Linia elastyczna",
-};
 
 /** Katalog posortowany wg grupy, potem mocy. */
 export const catalog: Product[] = [...products].sort((a, b) => {
@@ -33,16 +19,26 @@ export const catalog: Product[] = [...products].sort((a, b) => {
 export const maxEfficiency = (p: Product) => Math.max(...p.efficiency_pct);
 
 /** Krótki opis typu modułu do tytułów (bez superlatywów, wg danych). */
-export function kindLabel(p: Product): string {
-  if (isFlexible(p)) return p.family.includes("TOPCon") ? "moduł elastyczny TOPCon" : "moduł elastyczny PERC";
-  if (p.family.includes("double glass")) return "moduł bifacjalny TOPCon, double glass";
-  return p.bifacial ? "moduł bifacjalny TOPCon" : "moduł TOPCon N-type";
+export function kindLabel(p: Product, m: Messages): string {
+  const k = m.catalogLib.kind;
+  if (isFlexible(p)) return p.family.includes("TOPCon") ? k.flexTopcon : k.flexPerc;
+  if (p.family.includes("double glass")) return k.doubleGlass;
+  return p.bifacial ? k.bifacial : k.topcon;
+}
+
+/** Bardzo krótki opis do <title>. */
+export function shortKindLabel(p: Product, m: Messages): string {
+  const k = m.catalogLib.shortKind;
+  if (isFlexible(p)) return k.flex;
+  if (p.family.includes("double glass")) return k.doubleGlass;
+  return p.bifacial ? k.bifacial : k.topcon;
 }
 
 /** Technologia ogniwa do tabel. */
-export function technologyLabel(p: Product): string {
-  if (isFlexible(p)) return p.family.includes("TOPCon") ? "TOPCon, elastyczny" : "PERC, elastyczny";
-  return p.family.includes("double glass") ? "TOPCon, double glass" : "TOPCon N-type";
+export function technologyLabel(p: Product, m: Messages): string {
+  const k = m.catalogLib.tech;
+  if (isFlexible(p)) return p.family.includes("TOPCon") ? k.flexTopcon : k.flexPerc;
+  return p.family.includes("double glass") ? k.doubleGlass : k.topcon;
 }
 
 /**
@@ -59,20 +55,18 @@ export const showGlass = (p: Product) => Boolean(p.glass) && !withheld[p.slug]?.
  * Certyfikaty do publikacji zgodnie z CLAUDE.md §6: z rejestru data/documents.json
  * (tylko w zakresie mocy z certyfikatu) + normy wymienione na karcie katalogowej.
  */
-export function certificatesFor(p: Product): { label: string; detail?: string }[] {
+export function certificatesFor(p: Product, m: Messages, f: Formatter): { label: string; detail?: string }[] {
+  const c = m.catalogLib.cert;
   const fromRegistry = certificatesForProduct(p)
     .filter(({ cert }) => cert.category === "product" || cert.category === "ce" || cert.category === "tests")
     .map(({ cert, coverage }) => ({
-      label: `${cert.body}, nr ${cert.number}`,
-      detail: `${cert.standards.join(", ")}; ${coverageLabel(coverage)}${cert.validUntil ? `; ważny do ${formatDate(cert.validUntil)}` : ""}`,
+      label: tpl(c.number, { body: cert.body, number: cert.number }),
+      detail: `${cert.standards.join(", ")}; ${coverageLabel(coverage, m, f)}${cert.validUntil ? `; ${tpl(c.validUntil, { date: f.date(cert.validUntil) })}` : ""}`,
     }));
-  const fromDatasheet = p.certifications_on_datasheet.map((c) => ({ label: `${c} (wg karty katalogowej)` }));
+  const fromDatasheet = p.certifications_on_datasheet.map((name) => ({
+    label: tpl(c.onDatasheet, { name }),
+  }));
   return [...fromRegistry, ...fromDatasheet];
-}
-
-export function formatDate(iso: string): string {
-  const [y, m, d] = iso.split("-");
-  return `${d}.${m}.${y}`;
 }
 
 export function pieces(p: Product, unit: "pallet" | "20ft" | "40ft_hq"): string {
@@ -83,10 +77,11 @@ export function pieces(p: Product, unit: "pallet" | "20ft" | "40ft_hq"): string 
 export function kwpLabel(
   p: Product,
   unit: "pallet" | "20ft" | "40ft_hq",
+  f: Formatter,
   powerW = powerRange(p).max,
 ): string {
   const { min, max } = kwpPer(p, unit, powerW);
-  return min === max ? formatNumber(max) : `${formatNumber(min)}–${formatNumber(max)}`;
+  return min === max ? f.num(max) : `${f.num(min)}–${f.num(max)}`;
 }
 
 /** Sąsiednie modele w tej samej grupie (do porównania na karcie). */
@@ -120,11 +115,6 @@ export function vocAt(p: Product, binIndex: number, t: number): number {
 export type Segment = "roof" | "large" | "flex";
 export const segmentOf = (p: Product): Segment =>
   isFlexible(p) ? "flex" : powerRange(p).max > 500 ? "large" : "roof";
-export const segmentLabel: Record<Segment, string> = {
-  roof: "Dachy domów i firm, carporty",
-  large: "Dachy przemysłowe i farmy PV",
-  flex: "Linia elastyczna — dachy specjalne",
-};
 /** Kolory legend: zieleń i pomarańcz marki + błękit linii elastycznej. */
 export const segmentColor: Record<Segment, string> = {
   roof: "#529e4a",
